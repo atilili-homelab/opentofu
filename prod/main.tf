@@ -39,10 +39,23 @@ locals {
   ])
 }
 
+# tflint-ignore: terraform_unused_declarations
 data "proxmox_hardware_pci" "gpu_check" {
   for_each  = toset(local.gpu_nodes)
   node_name = each.value
+
+  filters = {
+    class = "03"
+  }
+
+  lifecycle {
+    postcondition {
+      condition     = length(self.devices) > 0
+      error_message = "Le noeud ${each.value} n'a pas de GPU : une VM avec gpu_passthrough ne peut pas y être placée."
+    }
+  }
 }
+
 
 resource "proxmox_node_config" "nodes" {
   for_each    = toset(["meganode", "supernode", "mininode"])
