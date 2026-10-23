@@ -56,3 +56,15 @@ repos:
         pass_filenames: false
         files: (?:(?:^|/)action|^\.(?:forgejo|github|gitea)/workflows/[^/\n]+)\.ya?ml$
         types: [yaml]
+      - id: tofu-fmt
+        name: OpenTofu fmt
+        entry: tofu fmt -recursive
+        language: system
+        pass_filenames: false
+        file: \.(tf|tfvars)$
+      - id: tflint
+        name: TFLint
+        entry: tflint
+        language: system
+        pass_filenames: false
+        files: \.(tf|tfvars)$
