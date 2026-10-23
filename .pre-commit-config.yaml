@@ -15,9 +15,7 @@ repos:
       - id: check-added-large-files
       - id: detect-private-key
       - id: end-of-file-fixer
-        exclude: ^prod/cloud-init-common\.yaml$
       - id: trailing-whitespace
-        exclude: ^prod/cloud-init-common\.yaml$
       - id: mixed-line-ending
         args: [--fix=lf]
 

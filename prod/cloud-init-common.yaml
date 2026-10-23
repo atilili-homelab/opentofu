@@ -17,7 +17,7 @@ users:
     lock_passwd: true
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHmioSel9+Ui/9dLqOQiQ6kV+LFzkvzjXS0VIQeS0ZeQ
-  
+
 # Desactive dhcpcd au boot et récupère la passerelle par défaut pour relais DNS
 bootcmd:
   - systemctl disable --now dhcpcd 2>/dev/null || true
