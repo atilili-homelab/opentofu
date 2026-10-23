@@ -68,6 +68,10 @@ resource "proxmox_virtual_environment_file" "cloud_init_user_data" {
     data      = local.user_data
     file_name = "cloud-init-${var.vm_name}.yml"
   }
+
+  lifecycle {
+    ignore_changes = [source_raw]
+  }
 }
 
 #=============================================================#
