@@ -1,0 +1,27 @@
+## ${lxc_name}
+**Rôle:** ${description != null ? description : "—"}
+**Environnement:** ${environment}
+
+### Réseau
+| Param | Valeur |
+|-------|--------|
+| **IP** | ${ip_address} |
+| **CTID** | ${lxc_id} |
+| **Node** | ${target_node} |
+| **VLAN** | ${vlan} |
+
+### Ressources
+| Param | Valeur |
+|-------|--------|
+| **CPU** | ${cores} vCPU |
+| **RAM** | ${memory} MB |
+| **Swap** | ${swap} MB |
+| **Disque** | ${disk_size} GB (${disk_datastore}) |
+| **Unprivileged** | ${unprivileged} |
+| **Boot auto** | ${start_on_boot} |
+
+### Tags
+${tags}
+
+---
+*Géré par OpenTofu — ne pas modifier manuellement*

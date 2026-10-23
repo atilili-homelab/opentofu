@@ -1,0 +1,25 @@
+## ${vm_name}
+**Rôle:** ${description != null ? description : "—"}
+**Environnement:** ${environment}
+
+### Réseau
+| Param | Valeur |
+|-------|--------|
+| **IP** | ${ip_address} |
+| **VMID** | ${vm_id} |
+| **Node** | ${target_node} |
+| **VLAN** | ${vlan} |
+
+### Ressources
+| Param | Valeur |
+|-------|--------|
+| **CPU** | ${cores} vCPU (shares: ${cpu_shares}) |
+| **RAM** | ${memory} MB${memory_max != "" ? " (ballooning → ${memory_max} MB)" : ""} |
+| **GPU** | ${gpu} |
+| **Boot auto** | ${onboot} |
+
+### Tags
+${tags}
+
+---
+*Géré par OpenTofu — ne pas modifier manuellement*

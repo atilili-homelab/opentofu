@@ -16,6 +16,8 @@
         pre-commit
         gitleaks
         forgejo-runner
+        tflint
+        opentofu
       ];
   in {
     devShells = forAllSystems (pkgs: {
