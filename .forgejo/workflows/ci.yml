@@ -1,0 +1,28 @@
+on:
+  push:
+    branches-ignore: [main]
+
+name: Test
+
+jobs:
+  pre-commit:
+    name: Pre-commit
+    runs-on: podman-nix
+    env:
+      NIX_CONFIG: "experimental-features = nix-command flakes"
+    steps:
+      - name: Install nodejs
+        run: nix profile add nixpkgs#nodejs-slim
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Gitleaks scan
+        run: nix develop -c gitleaks git --redact --verbose --log-opts="origin/main..HEAD"
+      - name: Cache pre-commit
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Pre-commit
+        run: nix develop -c pre-commit run --all-files --show-diff-on-failure
