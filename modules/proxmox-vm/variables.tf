@@ -192,29 +192,41 @@ variable "gateway" {
   type        = string
   description = "Passerelle par défaut pour la VM"
 }
+
 variable "hostname" {
   type        = string
   default     = null
   description = "Nom d'hôte de la VM"
 }
+
 variable "domain" {
   type        = string
   default     = "macopla.home"
   description = "Domaine de la VM"
 }
+
 variable "cloud_init_user_data" {
   type        = string
   description = "Contenu du fichier cloud-init user-data (en YAML) pour la configuration de la VM"
 }
+
 variable "cloud_init_datastore_id" {
   type        = string
   description = "ID du datastore où stocker le cloud-init"
 }
+
 variable "started" {
   type        = bool
   default     = true
   description = "Indique si la VM doit être démarrée après création (false = créée mais éteinte)"
 }
+
+variable "protection" {
+  type        = bool
+  default     = true
+  description = "Protection Proxmox : empêche la suppression de la VM"
+}
+
 variable "upgrade" {
   type        = bool
   default     = true

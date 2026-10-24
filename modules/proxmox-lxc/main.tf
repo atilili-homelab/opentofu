@@ -31,7 +31,7 @@ resource "proxmox_virtual_environment_container" "lxc" {
   started        = var.started
   start_on_boot  = var.start_on_boot
   unprivileged   = var.unprivileged
-  protection     = false
+  protection     = var.protection
   timeout_delete = var.timeout_delete
 
   features {

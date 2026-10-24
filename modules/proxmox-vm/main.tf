@@ -97,7 +97,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
       up_delay   = var.up_delay
     }
   }
-  protection    = false
+  protection    = var.protection
   scsi_hardware = "virtio-scsi-single"
   lifecycle {
     ignore_changes = [clone]

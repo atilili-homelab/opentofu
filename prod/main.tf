@@ -83,6 +83,7 @@ module "vms" {
   gpu_passthrough = each.value.gpu_passthrough
   iso_file_id     = each.value.iso_file_id
   started         = each.value.started
+  protection      = each.value.protection
   order           = each.value.order
   up_delay        = each.value.up_delay
   down_delay      = each.value.down_delay
@@ -129,6 +130,7 @@ module "lxcs" {
   disk_datastore   = each.value.disk_datastore
   start_on_boot    = each.value.start_on_boot
   started          = each.value.started
+  protection       = each.value.protection
   order            = each.value.order
   up_delay         = each.value.up_delay
   down_delay       = each.value.down_delay

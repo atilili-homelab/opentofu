@@ -34,6 +34,11 @@ variable "started" {
   default     = true
   description = "Démarrer le conteneur après création"
 }
+variable "protection" {
+  type        = bool
+  default     = true
+  description = "Protection Proxmox : empêche la suppression du LxC"
+}
 variable "start_on_boot" {
   type        = bool
   default     = true
