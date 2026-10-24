@@ -25,6 +25,14 @@ variable "ip_base" {
   default = "10.86"
 }
 
+variable "nodes" {
+  type = map(object({
+    address     = string
+    template_id = number
+  }))
+  description = "Noeud du cluster Proxmox : adresse SSH et template Packer de clonage"
+}
+
 variable "host_id_min" {
   type    = number
   default = 20
@@ -70,9 +78,8 @@ variable "vms" {
     error_message = "Chaque VM doit avoir une ID unique."
   }
   validation {
-    condition = alltrue([for vm in values(var.vms) : contains(["meganode", "supernode", "mininode"],
-    vm.target_node)])
-    error_message = "Chaque VM doit avoir un target_node valide (meganode/supernode/mininode)."
+    condition     = alltrue([for vm in values(var.vms) : contains(keys(var.nodes), vm.target_node)])
+    error_message = "Chaque VM doit avoir un target_node déclaré dans var.nodes."
   }
   validation {
     condition     = alltrue([for vm in values(var.vms) : vm.host_id >= var.host_id_min && vm.host_id <= var.host_id_max])
@@ -109,8 +116,7 @@ variable "lxcs" {
     error_message = "Chaque LXC doit avoir un host_id unique."
   }
   validation {
-    condition = alltrue([for lxc in values(var.lxcs) : contains(["meganode", "supernode", "mininode"],
-    lxc.target_node)])
-    error_message = "Chaque LXC doit avoir un target_node valide (meganode/supernode/mininode)."
+    condition     = alltrue([for lxc in values(var.lxcs) : contains(keys(var.nodes), lxc.target_node)])
+    error_message = "Chaque LXC doit avoir un target_node déclaré dans var.nodes."
   }
 }

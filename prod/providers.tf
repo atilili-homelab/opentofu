@@ -32,17 +32,12 @@ provider "proxmox" {
   ssh {
     agent    = true
     username = "root"
-    node {
-      name    = "meganode"
-      address = "10.86.30.11"
-    }
-    node {
-      name    = "supernode"
-      address = "10.86.30.12"
-    }
-    node {
-      name    = "mininode"
-      address = "10.86.30.13"
+    dynamic "node" {
+      for_each = var.nodes
+      content {
+        name    = node.key
+        address = node.value.address
+      }
     }
   }
 }

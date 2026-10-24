@@ -28,14 +28,6 @@ locals {
   #ISO Mode : si iso_file_id est défini, la VM est créé depuis l'ISO au lieu de cloner un template
   iso_mode = var.iso_file_id != null
 
-  # Template ID ciblé selon le node de deploiement cible
-  template_map = {
-    meganode  = 9000
-    supernode = 9001
-    mininode  = 9002
-  }
-  template_id = var.template_id != null ? var.template_id : lookup(local.template_map, var.target_node, null)
-
   # Ordre des blocs disk piloté par l'interface (scsi2 avant scsi10), pas par le nom de clé
   disks_ordered = {
     for k, d in var.disks :
@@ -120,7 +112,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
   dynamic "clone" {
     for_each = local.iso_mode ? [] : [1]
     content {
-      vm_id = local.template_id
+      vm_id = var.template_id
     }
   }
   cpu {

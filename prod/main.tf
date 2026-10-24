@@ -20,8 +20,8 @@ locals {
 }
 
 resource "proxmox_node_config" "nodes" {
-  for_each    = toset(["meganode", "supernode", "mininode"])
-  node_name   = each.value
+  for_each    = var.nodes
+  node_name   = each.key
   description = "Managed by OpenTofu"
 }
 
@@ -51,6 +51,7 @@ module "vms" {
   down_delay      = each.value.down_delay
   onboot          = each.value.onboot
   tags            = each.value.tags
+  template_id     = var.nodes[each.value.target_node].template_id
   description = templatefile("${path.module}/vm-description.md.tftpl", {
     vm_name     = each.key
     description = each.value.description
