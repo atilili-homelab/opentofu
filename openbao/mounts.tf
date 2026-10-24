@@ -15,3 +15,7 @@ resource "vault_auth_backend" "approle" {
     prevent_destroy = true
   }
 }
+
+resource "vault_auth_backend" "userpass" {
+  type = "userpass"
+}
