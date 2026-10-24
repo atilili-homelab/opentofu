@@ -1,1 +1,1 @@
-path "secret/data/opentofu/*"  { capabilities = ["read"] }
+path "secret/data/opentofu/*" { capabilities = ["read"] }
