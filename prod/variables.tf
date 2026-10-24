@@ -4,6 +4,12 @@ variable "proxmox_url" {
   default = "http://10.86.30.10:8006"
 }
 
+variable "state_passphrase" {
+  type        = string
+  sensitive   = true
+  description = "Passphrase de chiffrement du state fournie par rbw"
+}
+
 variable "login_approle_role_id" {
   type      = string
   sensitive = true
