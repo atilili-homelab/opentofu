@@ -13,3 +13,4 @@ credentials.*
 *.pem
 *.key
 .env
+/Session.vim

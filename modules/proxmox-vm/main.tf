@@ -138,7 +138,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
   }
   memory {
     dedicated = var.memory_max != null ? var.memory_max : var.memory
-    floating  = var.memory_max != null ? var.memory : var.memory
+    floating  = var.memory
   }
   network_device {
     model   = "virtio"

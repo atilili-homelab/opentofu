@@ -227,12 +227,6 @@ variable "protection" {
   description = "Protection Proxmox : empêche la suppression de la VM"
 }
 
-variable "upgrade" {
-  type        = bool
-  default     = true
-  description = "Realise un apt upgrade de la vm au premier boot"
-}
-
 variable "snippets_datastore_id" {
   type        = string
   description = "ID du datastore où stocker les snippets cloud-init"

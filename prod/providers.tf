@@ -5,10 +5,6 @@ terraform {
       source  = "bpg/proxmox"
       version = "~> 0.117.0"
     }
-    ovh = {
-      source  = "ovh/ovh"
-      version = "~> 2.22.0"
-    }
     vault = {
       source  = "opentofu/vault"
       version = "~> 5.13.0"
@@ -49,10 +45,6 @@ provider "proxmox" {
       address = "10.86.30.13"
     }
   }
-}
-
-provider "ovh" {
-  endpoint = "ovh-eu"
 }
 
 provider "vault" {
