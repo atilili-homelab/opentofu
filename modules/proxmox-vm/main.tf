@@ -2,7 +2,15 @@
 #====================== CALCULS  LOCAUX ======================#
 #=============================================================#
 
+data "proxmox_hardware_mapping_pci" "gpu" {
+  count = var.gpu_passthrough ? 1 : 0
+  name  = var.gpu_mapping
+}
+
 locals {
+  # GPU passthrough : nœuds présents dans le mapping PCI
+  gpu_mapping_nodes = var.gpu_passthrough ? [for m in data.proxmox_hardware_mapping_pci.gpu[0].map : m.node] : []
+
   # Construction du VM ID depuis l'IP
   ip_parts = split(".", var.ip_address)
   vm_id    = var.vm_id != null ? var.vm_id : tonumber("${local.ip_parts[2]}${local.ip_parts[3]}")
@@ -77,7 +85,6 @@ resource "proxmox_virtual_environment_file" "cloud_init_user_data" {
 #=============================================================#
 #========================= BUILD  VM =========================#
 #=============================================================#
-
 resource "proxmox_virtual_environment_vm" "vm" {
   name            = var.vm_name
   vm_id           = local.vm_id
@@ -101,6 +108,10 @@ resource "proxmox_virtual_environment_vm" "vm" {
   scsi_hardware = "virtio-scsi-single"
   lifecycle {
     ignore_changes = [clone]
+    precondition {
+      condition     = !var.gpu_passthrough || contains(local.gpu_mapping_nodes, var.target_node)
+      error_message = "Le mapping ${var.gpu_mapping} n'a pas d'entrée pour le noeud ${var.target_node} : la VM ne peut pas être déployée sur ce noeud"
+    }
   }
   agent {
     enabled = true #qemu-guest-agent
