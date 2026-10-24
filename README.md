@@ -133,9 +133,10 @@ utilisent les mêmes.
 - **Contrôle du GPU** : avant de placer une VM en passthrough, OpenTofu vérifie
   que le nœud visé possède bien une carte graphique, et s'arrête avec le nom du
   nœud sinon.
-- **`cloud-init-common.yaml` est exclu des hooks de nettoyage** : son contenu
-  est comparé octet par octet, et un simple espace retiré ferait recréer toutes
-  les VM.
+- **Cloud-init appliqué à la création seulement** : le snippet d'une VM
+  existante n'est jamais réécrit. Modifier `cloud-init-common.yaml` ne touche
+  que les nouvelles VM, ce qui évite de recréer les existantes et de changer
+  leur `instance-id` (cloud-init rejouerait sinon son premier démarrage).
 
 ## Intégration continue
 
