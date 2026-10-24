@@ -14,15 +14,6 @@ variable "login_approle_secret_id" {
   sensitive = true
 }
 
-variable "environment" {
-  type        = string
-  description = "Environment courant (lab/prod)"
-  validation {
-    condition     = contains(["lab", "prod"], var.environment)
-    error_message = "Environment doit être 'lab' ou 'prod'."
-  }
-}
-
 variable "ssh_public_keys" {
   type        = list(string)
   default     = []

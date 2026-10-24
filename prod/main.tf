@@ -1,34 +1,21 @@
 locals {
   vms_resolved = {
     for name, vm in var.vms : name => merge(vm, {
-      ip_address = format("%s.%d.%d", var.ip_base, local.env.net_segment, vm.host_id)
-      vm_id      = tonumber(format("%d%02d", local.env.net_segment, vm.host_id))
+      ip_address = format("%s.%d.%d", var.ip_base, local.net_segment, vm.host_id)
+      vm_id      = tonumber(format("%d%02d", local.net_segment, vm.host_id))
     })
   }
   lxcs_resolved = {
     for name, lxc in var.lxcs : name => merge(lxc, {
-      ip_address = format("%s.%d.%d", var.ip_base, local.env.net_segment, lxc.host_id)
-      lxc_id     = tonumber(format("%d%02d", local.env.net_segment, lxc.host_id))
+      ip_address = format("%s.%d.%d", var.ip_base, local.net_segment, lxc.host_id)
+      lxc_id     = tonumber(format("%d%02d", local.net_segment, lxc.host_id))
     })
   }
 }
 
 locals {
-  env_config = {
-    lab = {
-      net_segment    = 40
-      vm_name_prefix = "lab-"
-    }
-    prod = {
-      net_segment    = 30
-      vm_name_prefix = ""
-    }
-  }
-}
-
-locals {
-  env              = local.env_config[var.environment]
-  gateway          = "${var.ip_base}.${local.env.net_segment}.1"
+  net_segment      = 30
+  gateway          = "${var.ip_base}.${local.net_segment}.1"
   shared_datastore = "nas-ressources"
 }
 
@@ -73,7 +60,7 @@ module "vms" {
   vm_id       = local.vms_resolved[each.key].vm_id
 
   # Optionnels avec valeurs par défaut
-  vm_name         = "${local.env.vm_name_prefix}${each.key}"
+  vm_name         = each.key
   gateway         = local.gateway
   cores           = each.value.cores
   cpu_shares      = each.value.cpu_shares
@@ -90,13 +77,12 @@ module "vms" {
   onboot          = each.value.onboot
   tags            = each.value.tags
   description = templatefile("${path.module}/vm-description.md.tftpl", {
-    vm_name     = "${local.env.vm_name_prefix}${each.key}"
+    vm_name     = each.key
     description = each.value.description
-    environment = var.environment
     ip_address  = local.vms_resolved[each.key].ip_address
     vm_id       = local.vms_resolved[each.key].vm_id
     target_node = each.value.target_node
-    vlan        = local.env.net_segment
+    vlan        = local.net_segment
     cores       = each.value.cores
     cpu_shares  = each.value.cpu_shares
     memory      = each.value.memory
@@ -120,7 +106,7 @@ module "lxcs" {
   target_node      = each.value.target_node
   ip_address       = local.lxcs_resolved[each.key].ip_address
   lxc_id           = local.lxcs_resolved[each.key].lxc_id
-  lxc_name         = "${local.env.vm_name_prefix}${each.key}"
+  lxc_name         = each.key
   gateway          = local.gateway
   template_file_id = each.value.template_file_id
   cores            = each.value.cores
@@ -137,13 +123,12 @@ module "lxcs" {
   unprivileged     = each.value.unprivileged
   tags             = each.value.tags
   description = templatefile("${path.module}/lxc-description.md.tftpl", {
-    lxc_name       = "${local.env.vm_name_prefix}${each.key}"
+    lxc_name       = each.key
     description    = each.value.description
-    environment    = var.environment
     ip_address     = local.lxcs_resolved[each.key].ip_address
     lxc_id         = local.lxcs_resolved[each.key].lxc_id
     target_node    = each.value.target_node
-    vlan           = local.env.net_segment
+    vlan           = local.net_segment
     cores          = each.value.cores
     memory         = each.value.memory
     swap           = each.value.swap
@@ -159,16 +144,20 @@ module "lxcs" {
 
 module "dns_records" {
   source = "../modules/technitium-dns"
-  count  = var.environment == "prod" ? 1 : 0
 
   api_url           = "http://10.86.30.42:5380"
   token             = ephemeral.vault_kv_secret_v2.technitium.data["token"]
   vault_addr        = "http://sati.macopla.home:8200"
   vault_secret_path = "secret/data/opentofu/technitium"
   records = merge(
-    { for name, _ in var.vms : "${local.env.vm_name_prefix}${name}" =>
+    { for name, _ in var.vms : name =>
     local.vms_resolved[name].ip_address },
-    { for name, _ in var.lxcs : "${local.env.vm_name_prefix}${name}" =>
+    { for name, _ in var.lxcs : name =>
     local.lxcs_resolved[name].ip_address }
   )
+}
+
+moved {
+  from = module.dns_records[0]
+  to   = module.dns_records
 }
