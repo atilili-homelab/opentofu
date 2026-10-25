@@ -89,6 +89,7 @@ vms = {
     up_delay   = 10
     down_delay = 10
     backup     = true
+    ha         = "started"
     tags       = ["tier_infra", "traefik"]
   }
 
@@ -106,6 +107,7 @@ vms = {
     up_delay   = 10
     down_delay = 10
     backup     = true
+    ha         = "started"
     tags       = ["tier_apps", "traefik"]
   }
 
@@ -123,6 +125,7 @@ vms = {
     up_delay   = 10
     down_delay = 10
     backup     = true
+    ha         = "started"
     tags       = ["tier_media"]
   }
 
@@ -156,6 +159,7 @@ vms = {
     down_delay = 15
     started    = true
     backup     = true
+    ha         = "started"
     tags       = ["tier_database"]
   }
 

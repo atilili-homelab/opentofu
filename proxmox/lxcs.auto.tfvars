@@ -14,6 +14,7 @@ lxcs = {
     disk_size   = 50
     order       = 1
     up_delay    = 10
+    ha          = "started"
     tags        = ["db_server"]
   }
 
@@ -53,6 +54,7 @@ lxcs = {
     order       = 2
     up_delay    = 10
     backup      = true
+    ha          = "started"
     tags        = ["openbao_server"]
   }
 }

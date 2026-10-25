@@ -71,15 +71,16 @@ variable "vms" {
     iso_file_id     = optional(string, null)
     started         = optional(bool, true)
     protection      = optional(bool, true)
+    ha              = optional(string)
     backup          = optional(bool, false)
     onboot          = optional(bool, true)
     order           = optional(number, null)
     down_delay      = optional(number, null)
     up_delay        = optional(number, null)
-    # ha              = optional(bool, false) <= fonctionnalité provider cassé
-    description = optional(string, null)
-    tags        = optional(list(string), [])
+    description     = optional(string, null)
+    tags            = optional(list(string), [])
   }))
+
   validation {
     condition     = length(distinct([for vm in values(var.vms) : vm.host_id])) == length(var.vms)
     error_message = "Chaque VM doit avoir une ID unique."
@@ -91,6 +92,11 @@ variable "vms" {
   validation {
     condition     = alltrue([for vm in values(var.vms) : vm.host_id >= var.host_id_min && vm.host_id <= var.host_id_max])
     error_message = "Range d'ID obligatoire des VM = 20 à 99"
+  }
+
+  validation {
+    condition     = alltrue([for vm in values(var.vms) : vm.ha == null || contains(["started", "stopped", "ignored", "disabled"], vm.ha)])
+    error_message = "La valeur de 'ha' doit être 'started', 'stopped', 'ignored', 'disabled' ou null."
   }
 }
 
@@ -108,6 +114,7 @@ variable "lxcs" {
     start_on_boot    = optional(bool, true)
     started          = optional(bool, true)
     protection       = optional(bool, true)
+    ha               = optional(string)
     backup           = optional(bool, false)
     order            = optional(number, null)
     down_delay       = optional(number, null)
@@ -119,6 +126,7 @@ variable "lxcs" {
     password         = optional(string, null)
   }))
   default = {}
+
   validation {
     condition     = length(distinct([for lxc in values(var.lxcs) : lxc.host_id])) == length(var.lxcs)
     error_message = "Chaque LXC doit avoir un host_id unique."
@@ -126,5 +134,9 @@ variable "lxcs" {
   validation {
     condition     = alltrue([for lxc in values(var.lxcs) : contains(keys(var.nodes), lxc.target_node)])
     error_message = "Chaque LXC doit avoir un target_node déclaré dans var.nodes."
+  }
+  validation {
+    condition     = alltrue([for lxc in values(var.lxcs) : lxc.ha == null || contains(["started", "stopped", "ignored", "disabled"], lxc.ha)])
+    error_message = "La valeur de 'ha' doit être 'started', 'stopped', 'ignored', 'disabled' ou null."
   }
 }
