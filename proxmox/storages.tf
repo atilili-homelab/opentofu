@@ -1,28 +1,3 @@
-import {
-  to = proxmox_storage_directory.local
-  id = "local"
-}
-
-import {
-  to = proxmox_storage_lvm.local_lvm
-  id = "local-LVM"
-}
-
-import {
-  to = proxmox_storage_lvm.local_lvm2
-  id = "local-LVM2"
-}
-
-import {
-  to = proxmox_storage_zfspool.local_zfs
-  id = "local-ZFS"
-}
-
-import {
-  to = proxmox_storage_nfs.nas_ressources
-  id = "nas-ressources"
-}
-
 resource "proxmox_storage_lvm" "local_lvm2" {
   content              = ["images", "rootdir"]
   disable              = false

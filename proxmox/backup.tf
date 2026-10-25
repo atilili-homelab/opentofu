@@ -13,8 +13,3 @@ resource "proxmox_backup_job" "daily" {
     [for name, lxc in var.lxcs : tostring(local.lxcs_resolved[name].lxc_id) if lxc.backup],
   )
 }
-
-import {
-  to = proxmox_backup_job.daily
-  id = "backup-fe994cf5-5393"
-}
