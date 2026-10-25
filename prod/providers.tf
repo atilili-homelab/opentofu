@@ -9,6 +9,10 @@ terraform {
       source  = "opentofu/vault"
       version = "~> 5.13.0"
     }
+    dns = {
+      source  = "hashicorp/dns"
+      version = "~> 3.6.2"
+    }
   }
 
   backend "s3" {
@@ -57,6 +61,14 @@ provider "vault" {
   }
 }
 
+provider "dns" {
+  update {
+    server        = "10.86.30.42"
+    key_name      = "opentofu."
+    key_algorithm = "hmac-sha256"
+    key_secret    = ephemeral.vault_kv_secret_v2.technitium.data["tsig_secret"]
+  }
+}
 ephemeral "vault_kv_secret_v2" "proxmox" {
   mount = "secret"
   name  = "opentofu/proxmox"

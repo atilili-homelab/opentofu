@@ -19,6 +19,13 @@ locals {
   shared_datastore = "nas-ressources"
 }
 
+locals {
+  dns_records = merge(
+    { for name, _ in var.vms : name => local.vms_resolved[name].ip_address },
+    { for name, _ in var.lxcs : name => local.lxcs_resolved[name].ip_address }
+  )
+}
+
 resource "proxmox_node_config" "nodes" {
   for_each    = var.nodes
   node_name   = each.key
@@ -119,18 +126,8 @@ module "lxcs" {
 }
 
 module "dns_records" {
-  source = "../modules/technitium-dns"
-
-  api_url           = "http://10.86.30.42:5380"
-  token             = ephemeral.vault_kv_secret_v2.technitium.data["token"]
-  vault_addr        = "http://sati.macopla.home:8200"
-  vault_secret_path = "secret/data/opentofu/technitium"
-  records = merge(
-    { for name, _ in var.vms : name =>
-    local.vms_resolved[name].ip_address },
-    { for name, _ in var.lxcs : name =>
-    local.lxcs_resolved[name].ip_address }
-  )
+  source  = "../modules/dns-records"
+  records = local.dns_records
 }
 
 moved {

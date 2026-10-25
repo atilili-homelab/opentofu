@@ -92,4 +92,7 @@ resource "proxmox_virtual_environment_container" "lxc" {
       password = var.password
     }
   }
+  lifecycle {
+    ignore_changes = [operating_system[0].template_file_id]
+  }
 }
