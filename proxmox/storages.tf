@@ -1,3 +1,8 @@
+import {
+  to = proxmox_storage_pbs.nas_backup
+  id = "nas-backup"
+}
+
 resource "proxmox_storage_lvm" "local_lvm2" {
   content              = ["images", "rootdir"]
   disable              = false
@@ -66,5 +71,28 @@ resource "proxmox_storage_directory" "local" {
 
   lifecycle {
     prevent_destroy = true
+  }
+}
+
+data "vault_kv_secret_v2" "pbs" {
+  mount = "secret"
+  name  = "opentofu/backup-agent"
+}
+
+resource "proxmox_storage_pbs" "nas_backup" {
+  content     = ["backup"]
+  datastore   = "storenas"
+  disable     = false
+  fingerprint = "af:54:0c:e6:eb:64:ce:aa:17:51:7c:ad:77:90:30:45:0b:8e:d8:b4:69:ca:cf:70:05:d8:f8:7a:6b:3f:06:e6"
+  id          = "nas-backup"
+  namespace   = "Macopla"
+  nodes       = []
+  password    = data.vault_kv_secret_v2.pbs.data["password"]
+  server      = "10.86.30.110"
+  username    = "backup-agent@pbs"
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes  = [password]
   }
 }
