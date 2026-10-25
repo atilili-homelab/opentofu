@@ -129,8 +129,3 @@ module "dns_records" {
   source  = "../modules/dns-records"
   records = local.dns_records
 }
-
-moved {
-  from = module.dns_records[0]
-  to   = module.dns_records
-}
