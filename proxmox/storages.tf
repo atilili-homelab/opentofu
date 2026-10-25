@@ -74,9 +74,10 @@ resource "proxmox_storage_directory" "local" {
   }
 }
 
-data "vault_kv_secret_v2" "pbs" {
-  mount = "secret"
-  name  = "opentofu/backup-agent"
+# TODO: switch to vault_kv_secret_v2 when [#2960](https://github.com/bpg/terraform-provider-proxmox/pull/2960) is resolved
+
+data "vault_generic_secret" "pbs" {
+  path = "secret/opentofu/backup-agent"
 }
 
 resource "proxmox_storage_pbs" "nas_backup" {
@@ -87,7 +88,7 @@ resource "proxmox_storage_pbs" "nas_backup" {
   id          = "nas-backup"
   namespace   = "Macopla"
   nodes       = []
-  password    = data.vault_kv_secret_v2.pbs.data["password"]
+  password    = data.vault_generic_secret.pbs.data["password"]
   server      = "10.86.30.110"
   username    = "backup-agent@pbs"
 
