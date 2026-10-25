@@ -88,6 +88,7 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
+    backup     = true
     tags       = ["tier_infra", "traefik"]
   }
 
@@ -104,6 +105,7 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
+    backup     = true
     tags       = ["tier_apps", "traefik"]
   }
 
@@ -120,6 +122,7 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
+    backup     = true
     tags       = ["tier_media"]
   }
 
@@ -152,6 +155,7 @@ vms = {
     up_delay   = 15
     down_delay = 15
     started    = true
+    backup     = true
     tags       = ["tier_database"]
   }
 
@@ -170,6 +174,7 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
+    backup     = true
     tags       = ["mail", "tier_standalone"]
   }
 

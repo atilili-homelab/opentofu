@@ -52,6 +52,7 @@ lxcs = {
     disk_size   = 4
     order       = 2
     up_delay    = 10
+    backup      = true
     tags        = ["openbao_server"]
   }
 }
