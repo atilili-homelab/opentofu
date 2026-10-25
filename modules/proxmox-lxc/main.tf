@@ -31,8 +31,12 @@ resource "proxmox_virtual_environment_container" "lxc" {
   started        = var.started
   start_on_boot  = var.start_on_boot
   unprivileged   = var.unprivileged
-  protection     = var.protection
   timeout_delete = var.timeout_delete
+  protection     = var.protection
+
+  lifecycle {
+    ignore_changes = [operating_system[0].template_file_id, node_name]
+  }
 
   features {
     nesting = true
@@ -91,8 +95,5 @@ resource "proxmox_virtual_environment_container" "lxc" {
       keys     = var.ssh_public_keys
       password = var.password
     }
-  }
-  lifecycle {
-    ignore_changes = [operating_system[0].template_file_id]
   }
 }

@@ -77,6 +77,7 @@ resource "proxmox_virtual_environment_file" "cloud_init_user_data" {
 #=============================================================#
 #========================= BUILD  VM =========================#
 #=============================================================#
+
 resource "proxmox_virtual_environment_vm" "vm" {
   name            = var.vm_name
   vm_id           = local.vm_id
@@ -88,6 +89,17 @@ resource "proxmox_virtual_environment_vm" "vm" {
   machine         = var.gpu_passthrough ? "q35" : null
   stop_on_destroy = true
   started         = var.started
+  scsi_hardware   = "virtio-scsi-single"
+  protection      = var.protection
+
+  lifecycle {
+    ignore_changes = [clone, node_name]
+    precondition {
+      condition     = !var.gpu_passthrough || contains(local.gpu_mapping_nodes, var.target_node)
+      error_message = "Le mapping ${var.gpu_mapping} n'a pas d'entrée pour le noeud ${var.target_node} : la VM ne peut pas être déployée sur ce noeud"
+    }
+  }
+
   dynamic "startup" {
     for_each = var.order != null ? [1] : []
     content {
@@ -96,31 +108,25 @@ resource "proxmox_virtual_environment_vm" "vm" {
       up_delay   = var.up_delay
     }
   }
-  protection    = var.protection
-  scsi_hardware = "virtio-scsi-single"
-  lifecycle {
-    ignore_changes = [clone]
-    precondition {
-      condition     = !var.gpu_passthrough || contains(local.gpu_mapping_nodes, var.target_node)
-      error_message = "Le mapping ${var.gpu_mapping} n'a pas d'entrée pour le noeud ${var.target_node} : la VM ne peut pas être déployée sur ce noeud"
-    }
-  }
+
   agent {
     enabled = true #qemu-guest-agent
     trim    = true
   }
+
   dynamic "clone" {
     for_each = local.iso_mode ? [] : [1]
     content {
       vm_id = var.template_id
     }
   }
+
   cpu {
     cores = var.cores
     type  = var.cpu_type
     units = var.cpu_shares
   }
-  # ISO : monter le fichier ISO comme lecteur CD virtuel
+
   dynamic "cdrom" {
     for_each = local.iso_mode ? [1] : []
     content {
@@ -128,7 +134,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
       interface = "ide2"
     }
   }
-  # GPU Passthrough (Yoflix)
+
   dynamic "hostpci" {
     for_each = var.gpu_passthrough ? [1] : []
     content {
@@ -136,18 +142,21 @@ resource "proxmox_virtual_environment_vm" "vm" {
       mapping = var.gpu_mapping
       pcie    = var.gpu_pcie
       rombar  = var.gpu_rombar
-      xvga    = false # Pas de VGA primaire (garde le VGA virtuel pour boot)
+      xvga    = false
     }
   }
+
   memory {
     dedicated = var.memory_max != null ? var.memory_max : var.memory
     floating  = var.memory
   }
+
   network_device {
     model   = "virtio"
     bridge  = "vmbr0"
     vlan_id = local.vlan_id
   }
+
   dynamic "disk" {
     for_each = local.disks_ordered
     content {
@@ -163,6 +172,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
       ssd          = disk.value.ssd
     }
   }
+
   dynamic "initialization" {
     for_each = local.iso_mode ? [] : [1]
     content {
@@ -183,7 +193,10 @@ resource "proxmox_virtual_environment_vm" "vm" {
   }
 }
 
-# Un diff sur cette ressource au plan = l'apply va rebooter la VM
+#=============================================================#
+#======================== REBOOT VM ==========================#
+#=============================================================#
+
 resource "terraform_data" "reboot_expected" {
   input = {
     cores      = var.cores
