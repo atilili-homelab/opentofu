@@ -36,14 +36,14 @@ d'Ansible : aucun fichier n'est échangé entre les deux outils.
 
 Deux _roots_, chacun avec son propre state :
 
-| Dossier | Ce qu'il gère                                                                    |
-| ------- | -------------------------------------------------------------------------------- |
-| `prod/` | VM et LXC du cluster, description des nœuds, enregistrements DNS dans Technitium |
-| `ovh/`  | VPS OVH hors site                                                                |
+| Dossier    | Ce qu'il gère                                                                    |
+| ---------- | -------------------------------------------------------------------------------- |
+| `proxmox/` | VM et LXC du cluster, description des nœuds, enregistrements DNS dans Technitium |
+| `ovh/`     | VPS OVH hors site                                                                |
 
-Les machines sont décrites comme des données, dans `prod/vms.auto.tfvars` et
-`prod/lxcs.auto.tfvars` : ajouter une machine revient à ajouter une entrée, sans
-toucher au code. Un modèle commenté en tête de `vms.auto.tfvars` liste les
+Les machines sont décrites comme des données, dans `proxmox/vms.auto.tfvars` et
+`proxmox/lxcs.auto.tfvars` : ajouter une machine revient à ajouter une entrée,
+sans toucher au code. Un modèle commenté en tête de `vms.auto.tfvars` liste les
 options disponibles.
 
 Trois modules font le travail :
@@ -99,7 +99,7 @@ Aucun secret n'est stocké dans ce dépôt.
 
 ```bash
 direnv allow     # une seule fois : charge l'environnement et les identifiants
-cd prod          # ou ovh
+cd proxmox       # ou ovh
 tofu init        # télécharge les providers aux versions du lockfile
 tofu plan        # montre ce qui changerait, sans rien modifier
 tofu apply       # applique, après relecture du plan
@@ -136,19 +136,19 @@ modules. Les mises à jour des providers sont proposées par Renovate.
 
 ## Structure
 
-| Élément                                    | Rôle                                                      |
-| ------------------------------------------ | --------------------------------------------------------- |
-| `prod/main.tf`                             | Calcul des adresses, appel des modules                    |
-| `prod/providers.tf`                        | Providers, backend S3 et lecture des secrets dans OpenBao |
-| `prod/variables.tf`                        | Déclaration des variables                                 |
-| `prod/vms.auto.tfvars`, `lxcs.auto.tfvars` | Inventaire des machines                                   |
-| `prod/common.auto.tfvars`                  | URL de Proxmox et clés SSH publiques                      |
-| `prod/cloud-init-common.yaml`              | Cloud-init commun à toutes les VM                         |
-| `ovh/`                                     | VPS OVH                                                   |
-| `modules/`                                 | Modules réutilisables                                     |
-| `flake.nix`, `flake.lock`                  | Environnement de développement reproductible              |
-| `.envrc`                                   | Chargement de l'environnement et des identifiants         |
-| `.pre-commit-config.yaml`                  | Contrôles automatiques avant chaque commit                |
+| Élément                                       | Rôle                                                      |
+| --------------------------------------------- | --------------------------------------------------------- |
+| `proxmox/main.tf`                             | Calcul des adresses, appel des modules                    |
+| `proxmox/providers.tf`                        | Providers, backend S3 et lecture des secrets dans OpenBao |
+| `proxmox/variables.tf`                        | Déclaration des variables                                 |
+| `proxmox/vms.auto.tfvars`, `lxcs.auto.tfvars` | Inventaire des machines                                   |
+| `proxmox/common.auto.tfvars`                  | URL de Proxmox et clés SSH publiques                      |
+| `proxmox/cloud-init-common.yaml`              | Cloud-init commun à toutes les VM                         |
+| `ovh/`                                        | VPS OVH                                                   |
+| `modules/`                                    | Modules réutilisables                                     |
+| `flake.nix`, `flake.lock`                     | Environnement de développement reproductible              |
+| `.envrc`                                      | Chargement de l'environnement et des identifiants         |
+| `.pre-commit-config.yaml`                     | Contrôles automatiques avant chaque commit                |
 
 ## Licence
 

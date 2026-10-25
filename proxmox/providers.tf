@@ -17,7 +17,7 @@ terraform {
 
   backend "s3" {
     bucket = "ma-infra-tfstate"
-    key    = "prod/terraform.tfstate"
+    key    = "proxmox/terraform.tfstate"
     region = "eu-west-par"
     endpoints = {
       s3 = "https://s3.eu-west-par.io.cloud.ovh.net"
