@@ -59,10 +59,10 @@ repos:
         entry: tofu fmt -recursive
         language: system
         pass_filenames: false
-        file: \.(tf|tfvars)$
+        files: \.(tf|tfvars)$
       - id: tflint
         name: TFLint
-        entry: tflint
+        entry: tflint --recursive
         language: system
         pass_filenames: false
         files: \.(tf|tfvars)$
