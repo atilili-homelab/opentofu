@@ -74,7 +74,6 @@ vms = {
   # =============================================================
   # SWARM WORKERS
   # =============================================================
-
   "seraph" = {
     target_node = "meganode"
     host_id     = 31
@@ -90,9 +89,9 @@ vms = {
     down_delay = 10
     backup     = true
     ha         = "started"
+    replicate  = true
     tags       = ["tier_infra", "traefik"]
   }
-
   "niobe" = {
     target_node = "supernode"
     host_id     = 32
@@ -108,9 +107,9 @@ vms = {
     down_delay = 10
     backup     = true
     ha         = "started"
+    replicate  = true
     tags       = ["tier_apps", "traefik"]
   }
-
   "link" = {
     target_node     = "meganode"
     host_id         = 33
@@ -126,9 +125,9 @@ vms = {
     down_delay = 10
     backup     = true
     ha         = "started"
+    replicate  = true
     tags       = ["tier_media"]
   }
-
   "oracle" = {
     target_node = "mininode"
     host_id     = 34
@@ -142,7 +141,6 @@ vms = {
     down_delay = 10
     tags       = ["tier_monitor"]
   }
-
   "dozer" = {
     target_node = "meganode"
     host_id     = 35
@@ -160,6 +158,7 @@ vms = {
     started    = true
     backup     = true
     ha         = "started"
+    replicate  = true
     tags       = ["tier_database"]
   }
 
@@ -179,9 +178,10 @@ vms = {
     up_delay   = 10
     down_delay = 10
     backup     = true
+    ha         = "started"
+    replicate  = true
     tags       = ["mail", "tier_standalone"]
   }
-
   "merovingian" = {
     target_node = "supernode"
     host_id     = 51
@@ -194,10 +194,10 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
+    ha         = "started"
+    replicate  = true
     tags       = ["seedbox", "tier_standalone"]
   }
-
-
   "mouse" = {
     target_node = "supernode"
     host_id     = 52
@@ -208,9 +208,13 @@ vms = {
       root  = { size = 32 }
       store = { size = 100, storage = "local-ZFS", interface = "scsi1" }
     }
-    tags = ["ci", "tier_standalone"]
+    order      = 3
+    up_delay   = 10
+    down_delay = 10
+    ha         = "started"
+    replicate  = true
+    tags       = ["ci", "tier_standalone"]
   }
-
   "zion" = {
     target_node = "supernode"
     host_id     = 86

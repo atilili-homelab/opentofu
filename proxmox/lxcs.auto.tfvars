@@ -15,6 +15,7 @@ lxcs = {
     order       = 1
     up_delay    = 10
     ha          = "started"
+    replicate   = true
     tags        = ["db_server"]
   }
 
@@ -55,6 +56,7 @@ lxcs = {
     up_delay    = 10
     backup      = true
     ha          = "started"
+    replicate   = true
     tags        = ["openbao_server"]
   }
 }
