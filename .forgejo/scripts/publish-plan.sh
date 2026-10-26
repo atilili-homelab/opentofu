@@ -89,20 +89,16 @@ api POST "/issues/$pr/comments" -d "$(jq -n --arg b "$body" '{body: $b}')" >/dev
 # Si AUTOMERGE est vrai, on fusionne la PR
 if [[ $AUTOMERGE == true ]]; then
     # fast-forward-only : ce qui arrive sur main est exactement ce qui a été planifié
-    payload="$(jq -n --arg sha "$SHA" \
-        '{Do: "fast-forward-only", head_commit_id: $sha, delete_branch_after_merge: true}')"
-    # Une PR toute neuve est encore en cours d'analyse côté Forgejo : on réessaie
-    for attempt in 1 2 3 4 5; do
-        # Sans -f : on garde le corps de la réponse, qui explique un refus
-        response="$(curl -sS -w '\n%{http_code}' -X POST -H "Authorization: token $FORGE_TOKEN" \
-            -H "Content-Type: application/json" "$API/pulls/$pr/merge" -d "$payload")"
-        code="${response##*$'\n'}"
-        if [[ $code == 200 ]]; then
-            echo "PR #$pr fusionnée"
-            exit 0
-        fi
-        echo "Tentative $attempt : HTTP $code ${response%$'\n'*}"
-        sleep 5
-    done
-    echo "::warning::Fusion de #$pr refusée, voir les réponses ci-dessus"
+    # Programmée : la protection de main exige Test / *, dont ce job encore en cours
+    payload="$(jq -n --arg sha "$SHA" '{Do: "fast-forward-only", head_commit_id: $sha,
+        merge_when_checks_succeed: true, delete_branch_after_merge: true}')"
+    # Sans -f : on garde le corps de la réponse, qui explique un refus
+    response="$(curl -sS -w '\n%{http_code}' -X POST -H "Authorization: token $FORGE_TOKEN" \
+        -H "Content-Type: application/json" "$API/pulls/$pr/merge" -d "$payload")"
+    code="${response##*$'\n'}"
+    if [[ $code == 2* ]]; then
+        echo "PR #$pr : fusion programmée dès que les statuts requis seront verts"
+    else
+        echo "::warning::Fusion de #$pr refusée : HTTP $code ${response%$'\n'*}"
+    fi
 fi

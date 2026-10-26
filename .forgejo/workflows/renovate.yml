@@ -2,7 +2,7 @@ on:
   push:
     branches: ["renovate/**"]
 
-name: Test Renovate
+name: Test
 
 concurrency:
   group: ci-${{ forgejo.ref }}
