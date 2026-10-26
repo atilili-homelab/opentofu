@@ -1,5 +1,5 @@
 {
-  description = "***";
+  description = "IaC du homelab";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 

@@ -84,7 +84,7 @@ resource "proxmox_storage_pbs" "nas_backup" {
   content     = ["backup"]
   datastore   = "storenas"
   disable     = false
-  fingerprint = "af:54:0c:e6:eb:64:ce:aa:17:51:7c:ad:77:90:30:45:0b:8e:d8:b4:69:ca:cf:70:05:d8:f8:7a:6b:3f:06:e6"
+  fingerprint = "22:42:e2:51:0a:64:70:bf:30:3b:20:67:08:1a:69:fa:3e:46:1a:e4:5f:34:2d:fa:ed:b0:e3:3c:47:e5:61:6b"
   id          = "nas-backup"
   namespace   = "Macopla"
   nodes       = []

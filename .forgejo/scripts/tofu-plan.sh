@@ -47,7 +47,7 @@ printf '| Root | Résultat |\n| ---- | -------- |\n' >"$OUT/summary.md"
 
 for root in "${ROOTS[@]}"; do
     echo "::group::tofu plan $root"
-    tofu -chdir="$root" init >/dev/null
+    tofu -chdir="$root" init
     rc=0
     tofu -chdir="$root" plan -lock=false -detailed-exitcode -out=ci.tfplan || rc=$?
     echo "::endgroup::"
