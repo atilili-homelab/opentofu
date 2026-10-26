@@ -30,13 +30,14 @@ provider "registry.opentofu.org/bpg/proxmox" {
     "zh:bfa104d8aeae169d06ac630446e7c750eff1f10e2e78f2d9250fcbca3f5ff7f9",
     "zh:c243b5118a0c86b945fb3fc4169a22f5038277cd7849f1feabfc713184e73756",
     "zh:da2c5d1c9319603ca378e92ff741c97467b261480d0743528b02cb6ae41fbd1a",
+    "zh:f26e0763dbe6a6b2195c94b44696f2110f7f55433dc142839be16b9697fa5597",
     "zh:fc3a38a51b00388f697566631b5ce035c75261ab02f5f0ac07c8a87cea9df9e8",
   ]
 }
 
 provider "registry.opentofu.org/hashicorp/dns" {
   version     = "3.6.2"
-  constraints = "~> 3.6.2"
+  constraints = "~> 3.6, ~> 3.6.2"
   hashes = [
     "h1:g1VN6HWy1vSkSl2j5Zk50P/ZkALs6bLTHlV+9utna7g=",
     "zh:1047a7f61a1b686435cf30d435d7bb285569736592c772290a0b0bd4dcaa2824",
