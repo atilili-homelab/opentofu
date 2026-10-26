@@ -1,8 +1,6 @@
 locals {
   approles = {
-    ansible       = ["ansible-policy"]
     "opentofu-ci" = ["opentofu-ci-policy"]
-    packer        = ["packer-policy"]
     "packer-ci"   = ["packer-policy"]
   }
 }
