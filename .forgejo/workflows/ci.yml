@@ -41,7 +41,10 @@ jobs:
           nix shell --inputs-from . nixpkgs#opentofu nixpkgs#openbao nixpkgs#jq
           -c .forgejo/scripts/tofu-plan.sh
       - name: Upload plans
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        # forgejo/ et non actions/ : seul le fork désactive le refus des instances non github.com
+        uses: forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e # v4
+        # Simple confort de relecture : ne doit pas bloquer statut, commentaire et merge
+        continue-on-error: true
         with:
           name: tofu-plan
           path: plans/
