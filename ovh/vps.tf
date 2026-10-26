@@ -1,11 +1,9 @@
-data "ovh_me" "my_account" {}
-
 resource "ovh_vps" "vps" {
   lifecycle {
     ignore_changes = [plan, plan_option, ovh_subsidiary]
   }
   display_name   = "controlplane_vps"
-  ovh_subsidiary = data.ovh_me.my_account.ovh_subsidiary
+  ovh_subsidiary = "FR"
   plan = [
     {
       duration     = "P1M"
