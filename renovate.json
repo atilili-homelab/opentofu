@@ -35,6 +35,13 @@
       "registryUrls": [
         "https://data.forgejo.org"
       ]
+    },
+    {
+      "description": "Seul le tag v4 du fork est patché (check GHES désactivé) ; les tags v4.x.y sont des commits upstream qui échouent sur Forgejo",
+      "matchPackageNames": [
+        "forgejo/upload-artifact"
+      ],
+      "enabled": false
     }
   ]
 }
