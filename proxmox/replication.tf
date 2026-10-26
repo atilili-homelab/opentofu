@@ -31,12 +31,3 @@ resource "proxmox_replication" "this" {
     ignore_changes = [target]
   }
 }
-
-import {
-  for_each = {
-    for name, r in local.replications : name => r
-    if contains(["3031-0", "3032-0", "3033-0", "3041-0", "3051-0", "3053-0"], r.id)
-  }
-  to = proxmox_replication.this[each.key]
-  id = each.value.id
-}

@@ -12,6 +12,10 @@ locals {
       auto_rebalance = null
     } if lxc.ha != null },
   )
+
+  traefik_ha = [
+    for name, vm in var.vms : proxmox_haresource.this[name].resource_id if contains(vm.tags, "traefik") && vm.ha != null
+  ]
 }
 
 resource "proxmox_haresource" "this" {
@@ -32,4 +36,20 @@ resource "proxmox_harule" "zfs_nodes" {
 
   nodes     = { for n in proxmox_storage_zfspool.local_zfs.nodes : n => null }
   resources = [for r in proxmox_haresource.this : r.resource_id]
+}
+
+resource "proxmox_harule" "traefik_apart" {
+  rule     = "traefik-apart"
+  type     = "resource-affinity"
+  affinity = "negative"
+  comment  = "Paire keepalived Traefik : jamais sur le meme noeud"
+
+  resources = local.traefik_ha
+
+  lifecycle {
+    precondition {
+      condition     = length(local.traefik_ha) <= length(proxmox_storage_zfspool.local_zfs.nodes)
+      error_message = "Le nombre de noeuds avec ZFS local est insuffisant pour separer les instances Traefik"
+    }
+  }
 }

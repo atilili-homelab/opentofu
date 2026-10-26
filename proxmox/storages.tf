@@ -1,8 +1,3 @@
-import {
-  to = proxmox_storage_pbs.nas_backup
-  id = "nas-backup"
-}
-
 resource "proxmox_storage_lvm" "local_lvm2" {
   content              = ["images", "rootdir"]
   disable              = false
