@@ -2,5 +2,26 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "local>homelab/renovate-config"
+  ],
+  "platformAutomerge": false,
+  "packageRules": [
+    {
+      "description": "Providers 0.x compris : le statut tofu/plan reste pending s'il y a un diff, ce qui bloque l'automerge",
+      "matchManagers": [
+        "terraform"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Lock file maintenance : flake.lock et .terraform.lock.hcl, même garde-fou",
+      "matchUpdateTypes": [
+        "lockFileMaintenance"
+      ],
+      "automerge": true
+    }
   ]
 }

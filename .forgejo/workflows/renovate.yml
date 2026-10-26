@@ -1,0 +1,71 @@
+on:
+  push:
+    branches: ["renovate/**"]
+
+name: Test Renovate
+
+concurrency:
+  group: ci-${{ forgejo.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    name: Pre-commit
+    runs-on: nixos
+    env:
+      SKIP: gitleaks-system
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Gitleaks scan
+        run: nix develop -c gitleaks git --redact --verbose --log-opts="origin/main..HEAD"
+      - name: Pre-commit
+        run: nix develop -c pre-commit run --all-files --show-diff-on-failure
+
+  plan:
+    name: Plan
+    needs: pre-commit
+    runs-on: nixos
+    env:
+      BAO_ADDR: http://sati.macopla.home:8200
+    # Steps sautés plutôt que job sauté : un statut skipped n'est pas garanti vert pour Renovate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Detect tofu changes
+        id: diff
+        run: |
+          if git diff --name-only origin/main...HEAD |
+            grep -qE '\.(tf|tfvars)$|\.terraform\.lock\.hcl$|^flake\.lock$'; then
+            echo "tofu=true" >>"$FORGEJO_OUTPUT"
+          else
+            echo "Aucun fichier tofu modifié : pas de plan"
+          fi
+      - name: Tofu plan
+        if: steps.diff.outputs.tofu == 'true'
+        env:
+          ROLE_ID: ${{ secrets.CI_TOFU_ROLE_ID }}
+          SECRET_ID: ${{ secrets.CI_TOFU_SECRET_ID }}
+        run: >-
+          nix shell --inputs-from . nixpkgs#opentofu nixpkgs#openbao nixpkgs#jq
+          -c .forgejo/scripts/tofu-plan.sh
+      - name: Upload plans
+        if: steps.diff.outputs.tofu == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tofu-plan
+          path: plans/
+      # Renovate ouvre et fusionne ses PR lui-même, d'après le statut tofu/plan
+      - name: Publish plan
+        if: steps.diff.outputs.tofu == 'true'
+        env:
+          FORGE_TOKEN: ${{ secrets.CI_BOT_TOKEN }}
+          CREATE_PR: "false"
+          ALLOW_MERGE: "false"
+        run: >-
+          nix shell --inputs-from . nixpkgs#jq nixpkgs#curl
+          -c .forgejo/scripts/publish-plan.sh

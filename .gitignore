@@ -4,6 +4,7 @@ result
 *.tfstate
 *.tfstate.*
 *.tfplan
+/plans/
 crash.log
 override.tf
 override.tf.json

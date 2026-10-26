@@ -1,28 +1,55 @@
 on:
   push:
-    branches-ignore: [main]
+    branches-ignore: [main, "renovate/**"]
 
 name: Test
+
+concurrency:
+  group: ci-${{ forgejo.ref }}
+  cancel-in-progress: true
 
 jobs:
   pre-commit:
     name: Pre-commit
-    runs-on: podman-nix
+    runs-on: nixos
     env:
-      NIX_CONFIG: "experimental-features = nix-command flakes"
+      SKIP: gitleaks-system
     steps:
-      - name: Install nodejs
-        run: nix profile add nixpkgs#nodejs-slim
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
       - name: Gitleaks scan
         run: nix develop -c gitleaks git --redact --verbose --log-opts="origin/main..HEAD"
-      - name: Cache pre-commit
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/pre-commit
-          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
       - name: Pre-commit
         run: nix develop -c pre-commit run --all-files --show-diff-on-failure
+
+  plan:
+    name: Plan
+    needs: pre-commit
+    runs-on: nixos
+    env:
+      BAO_ADDR: http://sati.macopla.home:8200
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Tofu plan
+        env:
+          ROLE_ID: ${{ secrets.CI_TOFU_ROLE_ID }}
+          SECRET_ID: ${{ secrets.CI_TOFU_SECRET_ID }}
+        run: >-
+          nix shell --inputs-from . nixpkgs#opentofu nixpkgs#openbao nixpkgs#jq
+          -c .forgejo/scripts/tofu-plan.sh
+      - name: Upload plans
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tofu-plan
+          path: plans/
+      - name: Publish plan
+        env:
+          FORGE_TOKEN: ${{ secrets.CI_BOT_TOKEN }}
+          CREATE_PR: "true"
+          ALLOW_MERGE: "true"
+        run: >-
+          nix shell --inputs-from . nixpkgs#jq nixpkgs#curl
+          -c .forgejo/scripts/publish-plan.sh

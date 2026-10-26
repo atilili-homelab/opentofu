@@ -124,15 +124,39 @@ utilisent les mêmes.
 
 ## Intégration continue
 
-La CI tourne sur Forgejo Actions, sur un runner sans root qui exécute ses jobs
-dans Podman.
+La CI tourne sur Forgejo Actions, en mode host sur le runner `mouse` (label
+`nixos`) : le store Nix et le cache pre-commit y sont persistants, les outils
+sont ceux du `flake.lock`, comme en local.
 
-| Workflow | Déclencheur                           | Ce qu'il fait                                                                 |
-| -------- | ------------------------------------- | ----------------------------------------------------------------------------- |
-| `ci.yml` | push sur une branche autre que `main` | gitleaks sur les commits de la branche, puis pre-commit sur tous les fichiers |
+| Workflow       | Déclencheur                              | Ce qu'il fait                                                          |
+| -------------- | ---------------------------------------- | ---------------------------------------------------------------------- |
+| `ci.yml`       | push hors de `main` et de `renovate/**`  | gitleaks, pre-commit, `tofu plan` ; ouvre la PR et la fusionne si possible |
+| `renovate.yml` | push sur `renovate/**`                   | mêmes contrôles et même plan, sans ouvrir ni fusionner la PR           |
 
-Le pre-commit lance notamment `tofu fmt` et `tflint` sur les deux roots et les
-modules. Les mises à jour des providers sont proposées par Renovate.
+Les deux appellent les mêmes scripts (`.forgejo/scripts/`) ; seuls les drapeaux
+`CREATE_PR` et `ALLOW_MERGE` changent. Après le plan, la CI commente la PR et
+pose un statut `tofu/plan` :
+
+- **aucun changement** : statut `success`, la PR est fusionnée en
+  fast-forward ;
+- **changements** : statut `pending`, la PR attend que je relise le plan
+  (commentaire ou artefact `tofu-plan`) et que je la fusionne à la main.
+
+L'apply n'est pas fait par la CI : après le merge, `git pull` sur `main` puis
+`tofu apply` en local. Le root `openbao` reste entièrement manuel.
+
+Renovate fusionne lui-même ses PR (`platformAutomerge: false`) et seulement si
+tous les statuts sont verts : un `tofu/plan` en `pending` bloque donc
+l'automerge, y compris pour les providers en 0.x et le lock file maintenance.
+
+Secrets attendus :
+
+| Où                      | Clé                                                 | Rôle                                         |
+| ----------------------- | --------------------------------------------------- | -------------------------------------------- |
+| Secrets du dépôt        | `CI_TOFU_ROLE_ID`, `CI_TOFU_SECRET_ID`              | AppRole `opentofu-ci` (root `openbao`)       |
+| Secrets du dépôt        | `CI_BOT_TOKEN`                                      | Token de `ci-bot` : PR, commentaires, statut |
+| OpenBao `opentofu/ci`   | `s3_access_key`, `s3_secret_key`, `state_passphrase` | Backend S3 et chiffrement du state           |
+| OpenBao `opentofu/ci`   | `ovh_application_key`, `ovh_application_secret`, `ovh_consumer_key` | API OVH                    |
 
 ## Structure
 
