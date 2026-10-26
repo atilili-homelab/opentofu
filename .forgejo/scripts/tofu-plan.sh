@@ -11,34 +11,31 @@ mkdir -p "$OUT"
 VAULT_TOKEN="$(printf '%s' "$SECRET_ID" |
     bao write -field=token auth/approle/login role_id="$ROLE_ID" secret_id=-)"
 export VAULT_TOKEN
+# Le provider vault du root proxmox réutilise ce token pendant le plan : révocation à la sortie seulement
+trap 'bao token revoke -self >/dev/null 2>&1 || true' EXIT
 
 # Récupération des secrets sur OpenBao
-ci="$(bao kv get -mount=secret -format=json opentofu/ci | jq '.data.data')"
-get() { jq -er --arg k "$1" '.[$k]' <<<"$ci"; }
+state="$(bao kv get -mount=secret -format=json opentofu/state | jq '.data.data')"
+ovh_ci="$(bao kv get -mount=secret -format=json opentofu/ci | jq '.data.data')"
+get() { jq -er --arg k "$2" '.[$k]' <<<"$1"; }
 
 # Construction des variables depuis la sortie jq OpenBao
 set -a
 # shellcheck disable=SC2034
 {
-    AWS_ACCESS_KEY_ID="$(get s3_access_key)"
-    AWS_SECRET_ACCESS_KEY="$(get s3_secret_key)"
+    AWS_ACCESS_KEY_ID="$(get "$state" s3_access_key)"
+    AWS_SECRET_ACCESS_KEY="$(get "$state" s3_secret_key)"
     AWS_DEFAULT_REGION=eu-west-par
-    OVH_APPLICATION_KEY="$(get ovh_application_key)"
-    OVH_APPLICATION_SECRET="$(get ovh_application_secret)"
-    OVH_CONSUMER_KEY="$(get ovh_consumer_key)"
-    OVH_ENDPOINT=ovh-eu
-    TF_VAR_state_passphrase="$(get state_passphrase)"
-    TF_VAR_login_approle_role_id="$ROLE_ID"
-    TF_VAR_login_approle_secret_id="$SECRET_ID"
+    TF_VAR_state_passphrase="$(get "$state" state_passphrase)"
+    OVH_APPLICATION_KEY="$(get "$ovh_ci" ovh_application_key)"
+    OVH_APPLICATION_SECRET="$(get "$ovh_ci" ovh_application_secret)"
+    OVH_CONSUMER_KEY="$(get "$ovh_ci" ovh_consumer_key)"
+    OVH_ENDPOINT="ovh-eu"
     TF_IN_AUTOMATION=1
     TF_INPUT=0
     TF_PLUGIN_CACHE_DIR="$HOME/.cache/tofu-plugins"
 }
 set +a
-
-# Le token ne sert plus : invalidé côté OpenBao et retiré de l'environnement des providers
-bao token revoke -self >/dev/null
-unset VAULT_TOKEN
 
 mkdir -p "$TF_PLUGIN_CACHE_DIR"
 

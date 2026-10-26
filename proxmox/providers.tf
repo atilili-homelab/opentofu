@@ -46,19 +46,11 @@ provider "proxmox" {
   }
 }
 
+# Pas d'auth_login : le token vient de la session (~/.vault-token en local, VAULT_TOKEN en CI)
 provider "vault" {
   address            = "http://sati.macopla.home:8200"
   add_address_to_env = true
   skip_child_token   = true
-
-  auth_login {
-    path = "auth/approle/login"
-
-    parameters = {
-      role_id   = var.login_approle_role_id
-      secret_id = var.login_approle_secret_id
-    }
-  }
 }
 
 provider "dns" {

@@ -72,8 +72,11 @@ réseau et dans le DNS.
 ## Prérequis
 
 - **Nix** avec les flakes activés, et **direnv**.
-- **rbw** (client Bitwarden CLI) : il fournit les identifiants AppRole
-  d'OpenBao, du bucket S3 et de l'API OVH.
+- **rbw** (client Bitwarden CLI) : il ne fournit que le mot de passe du compte
+  OpenBao, et garde une copie de secours de la passphrase du state et des clés
+  S3.
+- **bao** (CLI OpenBao) et **jq** : `.envrc` s'en sert pour se connecter et lire
+  les secrets.
 - Un accès réseau à **OpenBao**, à l'**API Proxmox**, à l'**API Technitium** et
   aux nœuds en SSH (le provider Proxmox s'en sert pour certains envois de
   fichiers).
@@ -88,9 +91,21 @@ Aucun secret n'est stocké dans ce dépôt.
 - Le **token API Proxmox** et le **token Technitium** sont lus dans OpenBao par
   des ressources `ephemeral` : ils sont relus à chaque exécution et ne sont
   jamais écrits, ni dans le state ni dans le plan.
-- À l'entrée dans le dossier, `.envrc` lit dans Bitwarden via rbw les
-  identifiants de l'AppRole `opentofu`, du bucket S3 et de l'API OVH, et les
-  exporte pour OpenTofu.
+- À l'entrée dans le dossier, `.envrc` se connecte à OpenBao avec mon compte
+  (mot de passe lu dans rbw), puis lit et exporte les identifiants du bucket
+  S3, la passphrase du state et la clé de l'API OVH.
+- Le provider vault n'a pas d'identité propre : il réutilise le token de la
+  session (`~/.vault-token` en local, `VAULT_TOKEN` en CI).
+
+| Chemin OpenBao (`secret/`) | Contenu                                         | Lu par        |
+| -------------------------- | ----------------------------------------------- | ------------- |
+| `opentofu/state`           | `s3_access_key`, `s3_secret_key`, `state_passphrase` | local et CI   |
+| `opentofu/ovh`             | clé API OVH avec droits d'écriture              | local         |
+| `opentofu/ci`              | clé API OVH en lecture seule (`GET /vps`, `/vps/*`) | CI            |
+| `opentofu/proxmox`, `opentofu/technitium`, `opentofu/backup-agent` | tokens lus par le root `proxmox` | local et CI |
+
+La passphrase du state et les clés S3 restent aussi dans Bitwarden, comme copie
+de secours : sans elles, une perte d'OpenBao rendrait les states illisibles.
 - Le **state** est stocké dans un bucket S3 chez OVH, avec verrouillage natif
   (`use_lockfile`) : deux exécutions simultanées ne peuvent pas l'écrire en même
   temps.
@@ -155,8 +170,10 @@ Secrets attendus :
 | ----------------------- | --------------------------------------------------- | -------------------------------------------- |
 | Secrets du dépôt        | `CI_TOFU_ROLE_ID`, `CI_TOFU_SECRET_ID`              | AppRole `opentofu-ci` (root `openbao`)       |
 | Secrets du dépôt        | `CI_BOT_TOKEN`                                      | Token de `ci-bot` : PR, commentaires, statut |
-| OpenBao `opentofu/ci`   | `s3_access_key`, `s3_secret_key`, `state_passphrase` | Backend S3 et chiffrement du state           |
-| OpenBao `opentofu/ci`   | `ovh_application_key`, `ovh_application_secret`, `ovh_consumer_key` | API OVH                    |
+
+L'AppRole `opentofu-ci` a sa propre policy (`openbao/policies/opentofu-ci-policy.hcl`),
+qui ne liste que les chemins dont la CI a besoin : elle ne peut pas lire
+`opentofu/ovh`.
 
 ## Structure
 

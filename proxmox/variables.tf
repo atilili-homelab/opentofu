@@ -7,17 +7,7 @@ variable "proxmox_url" {
 variable "state_passphrase" {
   type        = string
   sensitive   = true
-  description = "Passphrase de chiffrement du state fournie par rbw"
-}
-
-variable "login_approle_role_id" {
-  type      = string
-  sensitive = true
-}
-
-variable "login_approle_secret_id" {
-  type      = string
-  sensitive = true
+  description = "Passphrase de chiffrement du state, lue dans OpenBao (secret/opentofu/state)"
 }
 
 variable "ssh_public_keys" {
