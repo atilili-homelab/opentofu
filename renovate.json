@@ -22,6 +22,19 @@
         "lockFileMaintenance"
       ],
       "automerge": true
+    },
+    {
+      "description": "Actions forgejo/* : hébergées sur data.forgejo.org, pas sur github.com",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "forgejo/**"
+      ],
+      "overrideDatasource": "forgejo-tags",
+      "registryUrls": [
+        "https://data.forgejo.org"
+      ]
     }
   ]
 }
