@@ -40,7 +40,8 @@ decide_outcome() {
 }
 
 #Cherche la PR pour cette branche
-pr="$(api GET "/pulls/main/$BRANCH" | jq -r .number)" || pr=""
+# 404 attendu quand la branche n'a pas encore de PR
+pr="$(api GET "/pulls/main/$BRANCH" 2>/dev/null | jq -r .number)" || pr=""
 
 #Si pas de PR et que CREATE_PR est vrai, on en crée une
 if [[ -z $pr && $CREATE_PR == true ]]; then
@@ -88,8 +89,20 @@ api POST "/issues/$pr/comments" -d "$(jq -n --arg b "$body" '{body: $b}')" >/dev
 # Si AUTOMERGE est vrai, on fusionne la PR
 if [[ $AUTOMERGE == true ]]; then
     # fast-forward-only : ce qui arrive sur main est exactement ce qui a été planifié
-    api POST "/pulls/$pr/merge" -d "$(jq -n --arg sha "$SHA" \
-        '{Do: "fast-forward-only", head_commit_id: $sha, delete_branch_after_merge: true}')" &&
-        echo "PR #$pr fusionnée" ||
-        echo "::warning::Fusion de #$pr impossible (main a avancé ?) : rebase la branche"
+    payload="$(jq -n --arg sha "$SHA" \
+        '{Do: "fast-forward-only", head_commit_id: $sha, delete_branch_after_merge: true}')"
+    # Une PR toute neuve est encore en cours d'analyse côté Forgejo : on réessaie
+    for attempt in 1 2 3 4 5; do
+        # Sans -f : on garde le corps de la réponse, qui explique un refus
+        response="$(curl -sS -w '\n%{http_code}' -X POST -H "Authorization: token $FORGE_TOKEN" \
+            -H "Content-Type: application/json" "$API/pulls/$pr/merge" -d "$payload")"
+        code="${response##*$'\n'}"
+        if [[ $code == 200 ]]; then
+            echo "PR #$pr fusionnée"
+            exit 0
+        fi
+        echo "Tentative $attempt : HTTP $code ${response%$'\n'*}"
+        sleep 5
+    done
+    echo "::warning::Fusion de #$pr refusée, voir les réponses ci-dessus"
 fi
