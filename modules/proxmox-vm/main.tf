@@ -3,13 +3,13 @@
 #=============================================================#
 
 data "proxmox_hardware_mapping_pci" "gpu" {
-  count = var.gpu_passthrough ? 1 : 0
+  count = var.gpu_mapping != null ? 1 : 0
   name  = var.gpu_mapping
 }
 
 locals {
   # GPU passthrough : nœuds présents dans le mapping PCI
-  gpu_mapping_nodes = var.gpu_passthrough ? [for m in data.proxmox_hardware_mapping_pci.gpu[0].map : m.node] : []
+  gpu_mapping_nodes = var.gpu_mapping != null ? [for m in data.proxmox_hardware_mapping_pci.gpu[0].map : m.node] : []
 
   # Construction du VM ID depuis l'IP
   ip_parts = split(".", var.ip_address)
@@ -86,7 +86,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
   node_name       = var.target_node
   on_boot         = var.onboot
   keyboard_layout = "fr"
-  machine         = var.gpu_passthrough ? "q35" : null
+  machine         = var.gpu_mapping != null ? "q35" : null
   stop_on_destroy = true
   started         = var.started
   scsi_hardware   = "virtio-scsi-single"
@@ -95,8 +95,8 @@ resource "proxmox_virtual_environment_vm" "vm" {
   lifecycle {
     ignore_changes = [clone, node_name]
     precondition {
-      condition     = !var.gpu_passthrough || contains(local.gpu_mapping_nodes, var.target_node)
-      error_message = "Le mapping ${var.gpu_mapping} n'a pas d'entrée pour le noeud ${var.target_node} : la VM ne peut pas être déployée sur ce noeud"
+      condition     = var.gpu_mapping == null || contains(local.gpu_mapping_nodes, var.target_node)
+      error_message = "Le mapping ${coalesce(var.gpu_mapping, "-")} n'a pas d'entrée pour le noeud ${var.target_node} : la VM ne peut pas être déployée sur ce noeud"
     }
   }
 
@@ -136,7 +136,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
   }
 
   dynamic "hostpci" {
-    for_each = var.gpu_passthrough ? [1] : []
+    for_each = var.gpu_mapping != null ? [1] : []
     content {
       device  = "hostpci0"
       mapping = var.gpu_mapping
@@ -204,7 +204,7 @@ resource "terraform_data" "reboot_expected" {
     cpu_shares = var.cpu_shares
     memory     = var.memory
     memory_max = var.memory_max
-    gpu        = var.gpu_passthrough ? [var.gpu_mapping, var.gpu_pcie, var.gpu_rombar] : null
+    gpu        = var.gpu_mapping != null ? [var.gpu_mapping, var.gpu_pcie, var.gpu_rombar] : null
     network = local.iso_mode ? null : {
       ip      = "${var.ip_address}/${var.subnet_mask}"
       gateway = var.gateway

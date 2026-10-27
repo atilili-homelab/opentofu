@@ -51,16 +51,10 @@ variable "cpu_type" {
   description = "Processor type (host pour passthrought)"
 }
 
-variable "gpu_passthrough" {
-  type        = bool
-  default     = false
-  description = "Activer le GPU passthrough"
-}
-
 variable "gpu_mapping" {
   type        = string
-  default     = "gpu-intel"
-  description = "Nom du Resource Mapping PCI configuré dans Proxmox (Datacenter → Resource Mappings)"
+  default     = null
+  description = "Nom du mapping PCI du GPU à passer à la VM (null = pas de GPU)"
 }
 
 variable "gpu_pcie" {
