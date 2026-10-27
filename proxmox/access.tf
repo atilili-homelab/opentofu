@@ -1,18 +1,7 @@
-locals {
-  packer_acl_paths = toset(concat(
-    [for node in var.nodes : "/vms/${node.template_id}"],
-    [
-      "/storage/${proxmox_storage_zfspool.local_zfs.id}",
-      "/storage/${proxmox_storage_lvm.local_lvm.id}",
-      "/storage/${proxmox_storage_nfs.nas_ressources.id}",
-      "/sdn/zones/localnetwork",
-    ],
-  ))
-}
 resource "proxmox_virtual_environment_role" "packer" {
   role_id = "Packer"
   privileges = [
-    "VM.Allocate", "VM.Audit", "VM.Console", "VM.PowerMgmt", "VM.GuestAgent.Audit", "VM.Config.CDROM", "VM.Config.CPU", "VM.Config.Cloudinit", "VM.Config.HWType", "VM.Config.Memory", "VM.Config.Network", "VM.Config.Options", "Datastore.AllocateSpace", "Datastore.Audit", "SDN.Use",
+    "VM.Allocate", "VM.Audit", "VM.Console", "VM.PowerMgmt", "VM.GuestAgent.Audit", "VM.Config.CDROM", "VM.Config.CPU", "VM.Config.Cloudinit", "VM.Config.Disk", "VM.Config.HWType", "VM.Config.Memory", "VM.Config.Network", "VM.Config.Options", "Datastore.AllocateSpace", "Datastore.Audit", "SDN.Use",
   ]
 }
 
@@ -23,9 +12,7 @@ resource "proxmox_virtual_environment_user" "packer" {
 }
 
 resource "proxmox_acl" "packer" {
-  for_each = local.packer_acl_paths
-
-  path      = each.value
+  path      = "/"
   role_id   = proxmox_virtual_environment_role.packer.role_id
   user_id   = proxmox_virtual_environment_user.packer.user_id
   propagate = true
@@ -42,8 +29,8 @@ resource "vault_kv_secret_v2" "packer_token" {
   mount = "secret"
   name  = "packer/proxmox-token"
 
-  data_json_wo         = jsonencode({ token = proxmox_user_token.packer.value })
-  data_json_wo_version = 1
+  data_json_wo         = jsonencode({ token = split("=", proxmox_user_token.packer.value)[1] })
+  data_json_wo_version = 2
 }
 
 # ==========
