@@ -17,5 +17,5 @@ path "sys/mounts" { capabilities = ["read"] }
 path "sys/mounts/*" { capabilities = ["create", "read", "update", "delete", "list", "sudo"] }
 
 # Contenu des moteurs
-path "secret/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+path "secret/*" { capabilities = ["create", "read", "update", "patch", "delete", "list"] }
 path "identity/*" { capabilities = ["create", "read", "update", "delete", "list"] }
