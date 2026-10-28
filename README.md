@@ -67,15 +67,15 @@ Chaque machine reçoit aussi une description générée, affichée dans Proxmox
 
 Au-delà des machines, `proxmox/` décrit le cluster lui-même :
 
-| Fichier          | Contenu                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------- |
-| `cluster.tf`     | Options du datacenter (CRS `dynamic` avec rééquilibrage automatique, migration), mapping PCI `gpu-intel` |
+| Fichier          | Contenu                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| `cluster.tf`     | Options du datacenter (CRS `dynamic` avec rééquilibrage automatique, migration), mapping PCI `gpu-intel`        |
 | `storages.tf`    | Les six stockages : `local`, `local-LVM`, `local-LVM2`, `local-ZFS`, `nas-ressources` (NFS), `nas-backup` (PBS) |
-| `backup.tf`      | La sauvegarde quotidienne vers PBS                                                                      |
-| `ha.tf`          | Ressources HA, règle `zfs-nodes` (HA limitée aux nœuds ZFS), règle `traefik-apart`                      |
-| `replication.tf` | Réplication ZFS entre meganode et supernode                                                             |
-| `access.tf`      | Utilisateurs, groupe `admin`, rôle `Packer`, ACL et tokens API                                          |
-| `apt.tf`         | Dépôt `pve-no-subscription` activé sur chaque nœud                                                      |
+| `backup.tf`      | La sauvegarde quotidienne vers PBS                                                                              |
+| `ha.tf`          | Ressources HA, règle `zfs-nodes` (HA limitée aux nœuds ZFS), règle `traefik-apart`                              |
+| `replication.tf` | Réplication ZFS entre meganode et supernode                                                                     |
+| `access.tf`      | Utilisateurs, groupe `admin`, rôle `Packer`, ACL et tokens API                                                  |
+| `apt.tf`         | Dépôt `pve-no-subscription` activé sur chaque nœud                                                              |
 
 La plupart de ces réglages se déclarent **sur la machine elle-même**, dans les
 `.tfvars`, et le code en déduit le reste :
@@ -109,8 +109,8 @@ réseau et dans le DNS.
 Aucun outil n'utilise de token de `root@pam`. Chaque outil a son compte
 `<outil>@pve`, avec le minimum de droits :
 
-| Compte                                    | Droits                  | Token                                                       |
-| ----------------------------------------- | ----------------------- | ----------------------------------------------------------- |
+| Compte                                    | Droits                  | Token                                                        |
+| ----------------------------------------- | ----------------------- | ------------------------------------------------------------ |
 | `opentofu@pve`                            | `Administrator` sur `/` | créé à la main, rangé dans `secret/opentofu/proxmox`         |
 | `packer@pve`                              | rôle `Packer` sur `/`   | créé par OpenTofu, écrit dans `secret/packer/proxmox-token`  |
 | `ansible@pve`                             | `PVEAuditor` sur `/`    | créé par OpenTofu, écrit dans `secret/ansible/proxmox-token` |
@@ -152,12 +152,13 @@ secrets.
 
 Aucun secret n'est stocké dans ce dépôt.
 
-- Le **token API Proxmox** et la **clé TSIG du DNS** sont lus dans OpenBao par
-  des ressources `ephemeral` : ils sont relus à chaque exécution et ne sont
-  jamais écrits, ni dans le state ni dans le plan.
+- Le **token API Proxmox**, la clé SSH privée utilisé par le provider pour
+  déposer les snippets, et la **clé TSIG du DNS** sont lus dans OpenBao par des
+  ressources `ephemeral` : ils sont relus à chaque exécution et ne sont jamais
+  écrits, ni dans le state ni dans le plan.
 - À l'entrée dans le dossier, `.envrc` se connecte à OpenBao avec mon compte
-  (mot de passe lu dans rbw), puis lit et exporte les identifiants du bucket
-  S3, la passphrase du state et la clé de l'API OVH.
+  (mot de passe lu dans rbw), puis lit et exporte les identifiants du bucket S3,
+  la passphrase du state et la clé de l'API OVH.
 - Le provider vault n'a pas d'identité propre : il réutilise le token de la
   session (`~/.vault-token` en local, `VAULT_TOKEN` en CI).
 
@@ -166,7 +167,7 @@ Aucun secret n'est stocké dans ce dépôt.
 | `opentofu/state`                                                   | `s3_access_key`, `s3_secret_key`, `state_passphrase` | local et CI                          |
 | `opentofu/ovh`                                                     | clé API OVH avec droits d'écriture                   | local                                |
 | `opentofu/ci`                                                      | clé API OVH en lecture seule (`GET /vps`, `/vps/*`)  | CI                                   |
-| `opentofu/proxmox`, `opentofu/technitium`, `opentofu/backup-agent` | token Proxmox, clé TSIG, mot de passe PBS            | local et CI                          |
+| `opentofu/proxmox`, `opentofu/technitium`, `opentofu/backup-agent` | token Proxmox, clé SSH, clé TSIG, mot de passe PBS   | local et CI                          |
 | `packer/proxmox-token`, `ansible/proxmox-token`                    | tokens écrits par le root `proxmox`                  | Packer, Ansible (et relus par la CI) |
 
 La passphrase du state et les clés S3 restent aussi dans Bitwarden, comme copie
@@ -210,10 +211,10 @@ jet du code. Un import réussi, c'est un plan à **0 changement** ; le bloc
 - **Contrôle du GPU** : une precondition vérifie que le mapping de la VM a une
   entrée pour le nœud visé, et arrête le plan avant toute création sinon.
 - **Valeurs qui ne comptent qu'à la création** (`ignore_changes`) : le template
-  cloné, le snippet cloud-init, le template LXC, le nœud des machines (que la
-  HA et le CRS déplacent), la cible de réplication (inversée par Proxmox après
-  une migration) et le mot de passe PBS. Les modifier ne touche que les
-  nouvelles machines, sans recréer les existantes.
+  cloné, le snippet cloud-init, le template LXC, le nœud des machines (que la HA
+  et le CRS déplacent), la cible de réplication (inversée par Proxmox après une
+  migration) et le mot de passe PBS. Les modifier ne touche que les nouvelles
+  machines, sans recréer les existantes.
 - **`prevent_destroy`** sur ce qui ne doit jamais disparaître par erreur : les
   stockages, les comptes admin, le compte `opentofu@pve` et son ACL, et dans
   `openbao/` le moteur `secret/` et la méthode `approle/`.
@@ -236,8 +237,7 @@ Les deux appellent les mêmes scripts (`.forgejo/scripts/`) ; seuls les drapeaux
 `CREATE_PR` et `ALLOW_MERGE` changent. Après le plan, la CI commente la PR et
 pose un statut `tofu/plan` :
 
-- **aucun changement** : statut `success`, la PR est fusionnée en
-  fast-forward ;
+- **aucun changement** : statut `success`, la PR est fusionnée en fast-forward ;
 - **changements** : statut `pending`, la PR attend que je relise le plan
   (commentaire ou artefact `tofu-plan`) et que je la fusionne à la main.
 
@@ -266,9 +266,8 @@ l'appliquer avant de pousser.
 
 Choix assumés, à ne pas reprendre sans raison :
 
-- **Le réseau des nœuds** (`vmbr0`, lien de réplication USB en
-  `10.86.80.0/24`) : créé à l'installation, rarement modifié, et une erreur
-  couperait un nœud.
+- **Le réseau des nœuds** (`vmbr0`, lien de réplication USB en `10.86.80.0/24`)
+  : créé à l'installation, rarement modifié, et une erreur couperait un nœud.
 - **Les règles HA d'affinité négative envers des nœuds** : le provider ne les
   lit pas ; la règle `zfs-nodes` est donc écrite en positif.
 - **Les notifications Proxmox** (cibles, matchers) : absentes du provider.

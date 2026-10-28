@@ -215,17 +215,4 @@ vms = {
     replicate  = true
     tags       = ["ci", "tier_standalone"]
   }
-  "zion" = {
-    target_node = "supernode"
-    host_id     = 86
-    cores       = 4
-    cpu_shares  = 512
-    memory      = 4096
-    onboot      = false
-    started     = false
-    disks = {
-      root = { size = 64 }
-    }
-    tags = ["capsule", "tier_standalone"]
-  }
 }

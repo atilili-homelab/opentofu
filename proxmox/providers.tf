@@ -34,8 +34,8 @@ provider "proxmox" {
   api_token = ephemeral.vault_kv_secret_v2.proxmox.data["api_token"]
 
   ssh {
-    agent    = true
-    username = "root"
+    private_key = ephemeral.vault_kv_secret_v2.proxmox.data["ssh_key"]
+    username    = "root"
     dynamic "node" {
       for_each = var.nodes
       content {
