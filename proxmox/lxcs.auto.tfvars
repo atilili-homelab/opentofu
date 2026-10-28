@@ -57,6 +57,7 @@ lxcs = {
     backup      = true
     ha          = "started"
     replicate   = true
+    services    = ["bao"]
     tags        = ["openbao_server"]
   }
 }

@@ -69,6 +69,7 @@ variable "vms" {
     down_delay      = optional(number, null)
     up_delay        = optional(number, null)
     description     = optional(string, null)
+    services        = optional(list(string), [])
     tags            = optional(list(string), [])
   }))
 
@@ -112,10 +113,11 @@ variable "lxcs" {
     down_delay       = optional(number, null)
     up_delay         = optional(number, null)
     unprivileged     = optional(bool, true)
-    description      = optional(string, null)
-    tags             = optional(list(string), [])
     ssh_public_keys  = optional(list(string), [])
     password         = optional(string, null)
+    description      = optional(string, null)
+    services         = optional(list(string), [])
+    tags             = optional(list(string), [])
   }))
   default = {}
 

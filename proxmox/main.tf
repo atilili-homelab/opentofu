@@ -24,6 +24,12 @@ locals {
     { for name, _ in var.vms : name => local.vms_resolved[name].ip_address },
     { for name, _ in var.lxcs : name => local.lxcs_resolved[name].ip_address }
   )
+  dns_aliases = {
+    for service, hosts in transpose(merge(
+      { for name, vm in var.vms : name => vm.services },
+      { for name, lxc in var.lxcs : name => lxc.services }
+    )) : service => one(hosts)
+  }
 }
 
 resource "proxmox_node_config" "nodes" {
@@ -128,4 +134,5 @@ module "lxcs" {
 module "dns_records" {
   source  = "../modules/dns-records"
   records = local.dns_records
+  aliases = local.dns_aliases
 }
