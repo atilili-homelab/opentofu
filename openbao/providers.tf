@@ -22,5 +22,5 @@ terraform {
 }
 
 provider "vault" {
-  address = "http://sati.macopla.home:8200"
+  address = "https://bao.macopla.com:8200"
 }
