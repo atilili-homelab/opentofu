@@ -133,4 +133,15 @@ variable "lxcs" {
     condition     = alltrue([for lxc in values(var.lxcs) : lxc.ha == null || contains(["started", "stopped", "ignored", "disabled"], lxc.ha)])
     error_message = "La valeur de 'ha' doit être 'started', 'stopped', 'ignored', 'disabled' ou null."
   }
+  validation {
+    condition     = alltrue([for lxc in values(var.lxcs) : lxc.host_id >= var.host_id_min && lxc.host_id <= var.host_id_max])
+    error_message = "Range d'ID obligatoire des LXC = ${var.host_id_min} à ${var.host_id_max}"
+  }
+  validation {
+    condition = length(setintersection(
+      [for lxc in values(var.lxcs) : lxc.host_id],
+      [for vm in values(var.vms) : vm.host_id],
+    )) == 0
+    error_message = "Une VM et un LXC partagent un host_id (même IP et même VMID)."
+  }
 }
