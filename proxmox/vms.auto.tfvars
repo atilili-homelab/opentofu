@@ -84,7 +84,7 @@ vms = {
     host_id     = 31
     cores       = 2
     cpu_shares  = 2048
-    memory      = 5120
+    memory      = 4096
     disks = {
       root = { size = 32 }
       data = { size = 100, interface = "scsi1", backup = true }
@@ -120,7 +120,7 @@ vms = {
     host_id         = 33
     cores           = 8
     cpu_shares      = 2048
-    memory          = 8192
+    memory          = 6144
     gpu_passthrough = true
     disks = {
       root = { size = 100, backup = true }
@@ -200,8 +200,6 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
-    ha         = "started"
-    replicate  = true
     tags       = ["seedbox", "tier_standalone"]
   }
   "mouse" = {
@@ -217,8 +215,6 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
-    ha         = "started"
-    replicate  = true
     tags       = ["ci", "tier_standalone"]
   }
 }
