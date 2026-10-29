@@ -1,6 +1,35 @@
 # ============================================================
-# LXC Containers
+# TEMPLATE DE LXC - Copier/coller et modifier les valeurs
 # ============================================================
+/*
+  "NOM-DU-LXC" = {
+    target_node = "meganode"    # meganode / supernode / mininode
+    host_id     = XX            # 20-99, unique VM + LXC : dernier octet IP + base du VMID
+
+    # Optionnel (valeurs par défaut)
+    template_file_id = "nas-ressources:vztmpl/debian-13-standard_13.1-2_amd64.tar.zst"
+    cores            = 1
+    memory           = 512
+    swap             = 0
+    disk_size        = 4
+    disk_datastore   = "local-ZFS"
+    unprivileged     = true
+    ssh_public_keys  = []
+    password         = null
+    started          = true
+    start_on_boot    = true
+    order            = null
+    up_delay         = null
+    down_delay       = null
+    protection       = true
+    backup           = false    # Job quotidien
+    ha               = null     # started / stopped / ignored / disabled
+    replicate        = false    # Réplication ZFS vers l'autre nœud ZFS
+    description      = null
+    services         = []       # Un CNAME par nom, ex. ["bao"]
+    tags             = []       # Groupes Ansible
+  }
+*/
 
 lxcs = {
   # =============================================================

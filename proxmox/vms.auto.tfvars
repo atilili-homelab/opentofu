@@ -4,26 +4,31 @@
 /*
   "NOM-DE-LA-VM" = {
     target_node = "meganode"    # meganode / supernode / mininode
-    host_id     = XX            # 20-99, dernier octet IP + base du VMID
+    host_id     = XX            # 20-99, unique VM + LXC : dernier octet IP + base du VMID
 
     # Optionnel (valeurs par défaut)
-    cores            = 1
-    cpu_shares       = 1024     # 512 (low) / 1024 (normal) / 2048 (high)
-    memory           = 2048
-    memory_max       = null     # Activer ballooning si défini
-    onboot           = true
-    order            = null
-    up_delay         = null
-    down_delay       = null
-    gpu_passthrough  = false
-    started					 = true
-    iso_file_id      = null     # Si défini, crée depuis ISO au lieu du template
-    # Tags = groupes Ansible de base (générés dans l'inventaire dynamique)
-    tags = ["prod", "swarm_workers"]
+    cores           = 1
+    cpu_shares      = 1024      # 512 (low) / 1024 (normal) / 2048 (high)
+    memory          = 2048
+    memory_max      = null      # Active le ballooning si défini
     disks = {
-      root = { size = 10, storage = "local-ZFS" }
-      data = { size = 50, storage = "local-ZFS", interface = "scsi1", backup = false }
+      root = { size = 10, storage = "local-ZFS" }   # mininode : pas de local-ZFS
+      data = { size = 50, interface = "scsi1", backup = false }
     }
+    gpu_passthrough = false
+    iso_file_id     = null      # Si défini, installe depuis l'ISO au lieu du template
+    started         = true
+    onboot          = true
+    order           = null
+    up_delay        = null
+    down_delay      = null
+    protection      = true
+    backup          = false     # Job quotidien ; seuls les disques backup = true sont inclus
+    ha              = null      # started / stopped / ignored / disabled
+    replicate       = false     # Réplication ZFS vers l'autre nœud ZFS
+    description     = null
+    services        = []        # Un CNAME par nom, ex. ["bao"]
+    tags            = []        # Groupes Ansible ; "traefik" + ha → anti-affinité
   }
 */
 
