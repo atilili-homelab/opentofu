@@ -12,7 +12,7 @@ l'image, OpenTofu provisionne les machines, Ansible les configure.
 - **Des machines sur mesure, décrites par des modules dédiés** : chacune est
   dimensionnée pour ses services, et son IP, son ID et son DNS sont déduits
   automatiquement.
-- **Aucun secret d'accès dans le state** : token API, clé SSH et clé TSIG du DNS
+- **Les secrets des providers hors du state** : token API, clé SSH et clé TSIG du DNS
   sont fournis par des ressources `ephemeral`.
 - **Le moindre privilège** : un compte Proxmox par outil, dont les tokens sont
   livrés dans OpenBao.
