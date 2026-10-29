@@ -209,8 +209,8 @@ vms = {
     cpu_shares  = 512
     memory      = 8192
     disks = {
-      root  = { size = 32 }
-      store = { size = 100, storage = "local-ZFS", interface = "scsi1" }
+      root  = { size = 32, speed = { iops_write = 500, write = 50 } }
+      store = { size = 100, storage = "local-ZFS", interface = "scsi1", speed = { iops_write = 500, write = 50 } }
     }
     order      = 3
     up_delay   = 10

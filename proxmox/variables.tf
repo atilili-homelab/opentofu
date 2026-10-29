@@ -54,6 +54,16 @@ variable "vms" {
       storage   = optional(string, "local-ZFS")
       interface = optional(string, "scsi0")
       backup    = optional(bool, false)
+      speed = optional(object({
+        iops_read            = optional(number)
+        iops_read_burstable  = optional(number)
+        iops_write           = optional(number)
+        iops_write_burstable = optional(number)
+        read                 = optional(number)
+        read_burstable       = optional(number)
+        write                = optional(number)
+        write_burstable      = optional(number)
+      }))
       })), {
       root = {}
     })

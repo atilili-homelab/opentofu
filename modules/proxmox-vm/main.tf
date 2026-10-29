@@ -170,6 +170,20 @@ resource "proxmox_virtual_environment_vm" "vm" {
       discard      = disk.value.discard
       replicate    = disk.value.replicate
       ssd          = disk.value.ssd
+
+      dynamic "speed" {
+        for_each = disk.value.speed != null ? [disk.value.speed] : []
+        content {
+          iops_read            = speed.value.iops_read
+          iops_read_burstable  = speed.value.iops_read_burstable
+          iops_write           = speed.value.iops_write
+          iops_write_burstable = speed.value.iops_write_burstable
+          read                 = speed.value.read
+          read_burstable       = speed.value.read_burstable
+          write                = speed.value.write
+          write_burstable      = speed.value.write_burstable
+        }
+      }
     }
   }
 

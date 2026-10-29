@@ -109,6 +109,16 @@ variable "disks" {
     discard   = optional(string, "on")
     replicate = optional(bool, true)
     ssd       = optional(bool, true)
+    speed = optional(object({
+      iops_read            = optional(number)
+      iops_read_burstable  = optional(number)
+      iops_write           = optional(number)
+      iops_write_burstable = optional(number)
+      read                 = optional(number) # Mo/s
+      read_burstable       = optional(number) # Mo/s
+      write                = optional(number) # Mo/s
+      write_burstable      = optional(number) # Mo/s
+    }))
   }))
   default = {
     root = {}
