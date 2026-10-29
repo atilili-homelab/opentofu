@@ -144,6 +144,7 @@ vms = {
     order      = 3
     up_delay   = 10
     down_delay = 10
+    backup     = true
     tags       = ["tier_monitor"]
   }
   "dozer" = {
