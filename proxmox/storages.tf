@@ -1,17 +1,20 @@
-resource "proxmox_storage_lvm" "local_lvm2" {
-  content              = ["images", "rootdir"]
-  disable              = false
-  id                   = "local-LVM2"
-  nodes                = ["mininode"]
-  shared               = false
-  volume_group         = "local-LVM2"
-  wipe_removed_volumes = false
+resource "proxmox_storage_lvmthin" "local_lvm" {
+  content      = ["images", "rootdir"]
+  disable      = false
+  id           = "local-lvm"
+  nodes        = ["supernode"]
+  thin_pool    = "local-lvm"
+  volume_group = "local-lvm"
 
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
+import {
+  id = "local-lvm"
+  to = proxmox_storage_lvmthin.local_lvm
 
+}
 resource "proxmox_storage_zfspool" "local_zfs" {
   content        = ["images", "rootdir"]
   disable        = false

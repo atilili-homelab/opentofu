@@ -210,7 +210,7 @@ vms = {
     memory      = 8192
     disks = {
       root  = { size = 32, speed = { iops_write = 500, write = 50 } }
-      store = { size = 100, storage = "local-ZFS", interface = "scsi1" }
+      store = { size = 250, storage = "local-lvm", interface = "scsi1", replicate = false }
     }
     order      = 3
     up_delay   = 10
