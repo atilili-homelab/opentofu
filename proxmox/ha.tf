@@ -1,14 +1,14 @@
 locals {
   ha_resources = merge(
     { for name, vm in var.vms : name => {
-      id             = "vm:${local.vms_resolved[name].vm_id}"
+      id             = "vm:${module.vms[name].vm_id}"
       state          = vm.ha
       auto_rebalance = vm.gpu_passthrough ? false : null
       gpu            = vm.gpu_passthrough
       } if vm.ha != null
     },
     { for name, lxc in var.lxcs : name => {
-      id             = "ct:${local.lxcs_resolved[name].lxc_id}"
+      id             = "ct:${module.lxcs[name].lxc_id}"
       state          = lxc.ha
       auto_rebalance = null
       gpu            = false

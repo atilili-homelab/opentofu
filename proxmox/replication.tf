@@ -4,14 +4,14 @@ locals {
   replications = merge(
     {
       for name, vm in var.vms : name => {
-        id     = "${local.vms_resolved[name].vm_id}-0"
+        id     = "${module.vms[name].vm_id}-0"
         target = one([for n in local.zfs_nodes : n if n != vm.target_node])
       }
       if vm.replicate
     },
     {
       for name, lxc in var.lxcs : name => {
-        id     = "${local.lxcs_resolved[name].lxc_id}-0"
+        id     = "${module.lxcs[name].lxc_id}-0"
         target = one([for n in local.zfs_nodes : n if n != lxc.target_node])
       }
       if lxc.replicate
