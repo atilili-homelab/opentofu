@@ -1,3 +1,4 @@
+path "secret/data/services/*" { capabilities = ["read"] }
 path "secret/data/databases/*" { capabilities = ["read"] }
 path "secret/data/stacks/*" { capabilities = ["read"] }
 path "secret/data/ansible/*" { capabilities = ["read"] }
