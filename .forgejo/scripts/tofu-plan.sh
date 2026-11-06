@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Roots plan et dossier des résultats
-ROOTS=(proxmox ovh)
+ROOTS=(proxmox ovh lldap)
 OUT="$PWD/plans"
 mkdir -p "$OUT"
 

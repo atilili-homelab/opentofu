@@ -11,8 +11,8 @@ jamais : l'apply se fait en local, après la fusion.
 | `ci.yml`       | push hors `main` et `renovate/**` | gitleaks, pre-commit, plan ; ouvre et fusionne la PR |
 | `renovate.yml` | push sur `renovate/**`            | idem, plan seulement si des fichiers tofu changent   |
 
-Les deux appellent `.forgejo/scripts/tofu-plan.sh` (roots `proxmox/` et `ovh/` ;
-`openbao/` reste manuel) et `publish-plan.sh`.
+Les deux appellent `.forgejo/scripts/tofu-plan.sh` (roots `proxmox/`, `ovh/` et
+`lldap/` ; `openbao/` reste manuel) et `publish-plan.sh`.
 
 ## Après le plan
 

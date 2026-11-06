@@ -1,8 +1,9 @@
 # IaC de mon homelab avec OpenTofu
 
-Le code de mon homelab : un cluster Proxmox VE de trois nœuds et un VPS chez
-OVH. Secrets gérés dans OpenBao, enregistrements DNS automatisés vers
-Technitium, state distant dans un bucket S3 chez OVH.
+Le code de mon homelab : un cluster Proxmox VE de trois nœuds, un VPS chez
+OVH et les comptes de service de l'annuaire LLDAP. Secrets gérés dans OpenBao,
+enregistrements DNS automatisés vers Technitium, state distant dans un bucket
+S3 chez OVH.
 
 C'est le deuxième maillon de ma chaîne d'automatisation : Packer construit
 l'image, OpenTofu provisionne les machines, Ansible les configure.
@@ -12,8 +13,8 @@ l'image, OpenTofu provisionne les machines, Ansible les configure.
 - **Des machines sur mesure, décrites par des modules dédiés** : chacune est
   dimensionnée pour ses services, et son IP, son ID et son DNS sont déduits
   automatiquement.
-- **Les secrets des providers hors du state** : token API, clé SSH et clé TSIG du DNS
-  sont fournis par des ressources `ephemeral`.
+- **Les secrets des providers hors du state** : token API, clé SSH, clé TSIG du
+  DNS et mot de passe admin LLDAP sont fournis par des ressources `ephemeral`.
 - **Le moindre privilège** : un compte Proxmox par outil, dont les tokens sont
   livrés dans OpenBao.
 - **Une CI qui planifie chaque changement** : plan commenté dans la PR, fusion
@@ -33,6 +34,7 @@ flowchart LR
     tofu -->|VM, LXC, HA, stockages| pve[Proxmox VE]
     tofu -->|DNS| dns[Technitium]
     tofu -->|VPS| ovh[OVH]
+    tofu -->|comptes de service| lldap[LLDAP]
     pve -->|tags = groupes| ansible[Ansible]
 ```
 
@@ -66,6 +68,8 @@ dynamique d'Ansible : aucun fichier n'est échangé entre les deux outils.
 - `proxmox/` : le cluster (machines, stockages, HA, sauvegarde, accès, DNS)
 - `openbao/` : la configuration d'OpenBao (politiques, AppRoles, authentification)
 - `ovh/` : le VPS
+- `lldap/` : l'annuaire LLDAP (comptes de service et leurs groupes ; les
+  groupes sont lus, pas créés)
 - `modules/` : VM, LXC et enregistrements DNS
 
 ## Pour aller plus loin

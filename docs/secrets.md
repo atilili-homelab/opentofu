@@ -6,7 +6,8 @@ illisibles.
 
 ## Ce qui reste hors du state
 
-- **`ephemeral`** (`proxmox/providers.tf`) : token API Proxmox, clé SSH, clé TSIG.
+- **`ephemeral`** (`proxmox/providers.tf`, `lldap/providers.tf`) : token API
+  Proxmox, clé SSH, clé TSIG, mot de passe admin LLDAP.
   Relus à chaque exécution, jamais écrits dans le state ni le plan.
 - **Write-only** (`data_json_wo`, `password_wo`) : tokens Packer et Ansible, mot de
   passe OpenBao `yoann`. Voir [rotation.md](rotation.md).
@@ -26,6 +27,7 @@ illisibles.
 | `opentofu/ci` (API OVH, lecture seule)                             | CI                  |
 | `opentofu/proxmox`, `opentofu/technitium`, `opentofu/backup-agent` | local et CI         |
 | `packer/proxmox-token`, `ansible/proxmox-token` (écrits ici)       | Packer, Ansible, CI |
+| `services/lldap` (admin LLDAP, partagé avec la stack)              | local et CI         |
 
 En local, `.envrc` se connecte avec mon compte (mot de passe dans rbw). En CI,
 l'AppRole `opentofu-ci` a sa propre politique, qui ne peut pas lire `opentofu/ovh`.
