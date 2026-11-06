@@ -26,7 +26,8 @@ terraform {
 }
 
 provider "vault" {
-  address = "https://bao.macopla.com:8200"
+  address          = "https://bao.macopla.com:8200"
+  skip_child_token = true
 }
 
 ephemeral "vault_kv_secret_v2" "lldap" {
