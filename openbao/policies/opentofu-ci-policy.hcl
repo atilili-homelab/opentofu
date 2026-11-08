@@ -5,6 +5,8 @@ path "secret/data/opentofu/technitium" { capabilities = ["read"] }
 path "secret/data/opentofu/backup-agent" { capabilities = ["read"] }
 
 path "secret/data/services/lldap" { capabilities = ["read"] }
+path "secret/data/identities/*" { capabilities = ["read"] }
+path "secret/metadata/identities/*" { capabilities = ["list"] }
 
 path "secret/data/packer/proxmox-token" { capabilities = ["read"] }
 path "secret/metadata/packer/proxmox-token" { capabilities = ["read"] }
