@@ -12,7 +12,7 @@ locals {
   users = {
     for name, secret in data.vault_generic_secret.identity : name => {
       email        = secret.data["email"]
-      display_name = secret.data["email"]
+      display_name = secret.data["display_name"]
       groups       = split(",", nonsensitive(secret.data["groups"]))
     }
   }
