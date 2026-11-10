@@ -70,8 +70,9 @@ locals {
       role    = "PVEAuditor"
     }
     pdm = {
+      # TODO: Create a custom role for PDM with less privileges
       comment = "Proxmox Datacenter Manager (read only)",
-      role    = "PVEAuditor"
+      role    = "Administrator"
     }
   }
 }
