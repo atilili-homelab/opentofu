@@ -5,6 +5,7 @@ locals {
       state          = vm.ha
       auto_rebalance = vm.gpu_passthrough ? false : null
       gpu            = vm.gpu_passthrough
+      traefik        = contains(vm.tags, "traefik")
       } if vm.ha != null
     },
     { for name, lxc in var.lxcs : name => {
@@ -12,12 +13,13 @@ locals {
       state          = lxc.ha
       auto_rebalance = null
       gpu            = false
+      traefik        = false
     } if lxc.ha != null },
   )
 
-  traefik_ha = [
-    for name, vm in var.vms : proxmox_haresource.this[name].resource_id if contains(vm.tags, "traefik") && vm.ha != null
-  ]
+  traefik_preferred = {
+    for name, vm in var.vms : name => vm.target_node if contains(vm.tags, "traefik") && vm.ha != null
+  }
 }
 
 resource "proxmox_haresource" "this" {
@@ -39,10 +41,10 @@ resource "proxmox_harule" "zfs_nodes" {
   comment = "Ressource HA limitee aux noeuds qui ont local-ZFS (replication)"
 
   nodes     = { for n in proxmox_storage_zfspool.local_zfs.nodes : n => null }
-  resources = [for k, r in proxmox_haresource.this : r.resource_id if !local.ha_resources[k].gpu]
+  resources = [for k, r in proxmox_haresource.this : r.resource_id if !local.ha_resources[k].gpu && !local.ha_resources[k].traefik]
 }
 
-# Une ressource ne peut etre que dans une seule regle node-affinity : les VMs GPU sont exclues de zfs-nodes
+# Une ressource ne peut etre que dans une seule regle node-affinity : les VMs GPU et Traefik sont exclues de zfs-nodes
 resource "proxmox_harule" "link_meganode" {
   rule    = "link-meganode"
   type    = "node-affinity"
@@ -56,18 +58,23 @@ resource "proxmox_harule" "link_meganode" {
   depends_on = [proxmox_harule.zfs_nodes]
 }
 
-resource "proxmox_harule" "traefik_apart" {
-  rule     = "traefik-apart"
-  type     = "resource-affinity"
-  affinity = "negative"
-  comment  = "Paire keepalived Traefik : jamais sur le meme noeud"
+resource "proxmox_harule" "traefik_spread" {
+  for_each = local.traefik_preferred
 
-  resources = local.traefik_ha
+  rule    = "traefik-${each.key}"
+  type    = "node-affinity"
+  strict  = true
+  comment = "Traefik ${each.key} : noeuds avec local-ZFS, ${each.value} prefere pour repartir la paire"
+
+  nodes     = { for n in proxmox_storage_zfspool.local_zfs.nodes : n => n == each.value ? 2 : 1 }
+  resources = [proxmox_haresource.this[each.key].resource_id]
+
+  depends_on = [proxmox_harule.zfs_nodes]
 
   lifecycle {
     precondition {
-      condition     = length(local.traefik_ha) <= length(proxmox_storage_zfspool.local_zfs.nodes)
-      error_message = "Le nombre de noeuds avec ZFS local est insuffisant pour separer les instances Traefik"
+      condition     = contains(proxmox_storage_zfspool.local_zfs.nodes, each.value)
+      error_message = "Le target_node de ${each.key} doit avoir du ZFS local (replication)"
     }
   }
 }
