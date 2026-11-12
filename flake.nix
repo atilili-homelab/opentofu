@@ -22,7 +22,11 @@
   in {
     devShells = forAllSystems (pkgs: {
       default = pkgs.mkShell {
-        packages = checkTools pkgs;
+        packages =
+          checkTools pkgs
+          ++ [
+            pkgs.openbao # connexion Openbao dans .envrc
+          ];
       };
     });
   };
