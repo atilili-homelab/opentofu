@@ -61,10 +61,6 @@ locals {
       comment = "Ansible Inventory (read only)",
       role    = "PVEAuditor"
     }
-    homarr = {
-      comment = "Homarr Integration (read only)",
-      role    = "PVEAuditor"
-    }
     prometheus = {
       comment = "Exporter Prometheus (read only)",
       role    = "PVEAuditor"
