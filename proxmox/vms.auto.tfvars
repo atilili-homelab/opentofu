@@ -28,7 +28,7 @@
     replicate       = false     # Réplication ZFS vers l'autre nœud ZFS
     description     = null
     services        = []        # Un CNAME par nom, ex. ["bao"]
-    tags            = []        # Groupes Ansible ; "traefik" + ha → anti-affinité
+    tags            = []        # Groupes Ansible ; "traefik" + ha → target_node préféré, cohabitation permise (ha.tf)
   }
 */
 
