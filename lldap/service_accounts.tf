@@ -4,6 +4,14 @@ locals {
       display_name = "Authelia"
       groups       = ["lldap_password_manager"]
     }
+    jellyfin = {
+      display_name = "Jellyfin"
+      groups       = ["lldap_strict_readonly"]
+    }
+    wizarr = {
+      display_name = "Wizarr"
+      groups       = ["lldap_admin"]
+    }
   }
 }
 
