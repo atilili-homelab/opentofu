@@ -75,7 +75,7 @@ locals {
 resource "proxmox_virtual_environment_user" "service" {
   for_each = local.service_accounts
   user_id  = "${each.key}@pve"
-  comment  = each.value.comment
+  comment  = "${each.value.comment}, gere par OpenTofu"
   enabled  = true
 }
 resource "proxmox_acl" "service" {
@@ -103,6 +103,7 @@ locals {
     }
   }
 }
+
 resource "proxmox_user_token" "managed" {
   for_each              = local.managed_tokens
   user_id               = each.value.user_id
@@ -110,6 +111,7 @@ resource "proxmox_user_token" "managed" {
   comment               = "${each.value.comment}, gere par OpenTofu"
   privileges_separation = false
 }
+
 resource "vault_kv_secret_v2" "managed_tokens" {
   for_each             = local.managed_tokens
   mount                = "secret"
@@ -126,4 +128,41 @@ resource "proxmox_virtual_environment_role" "packer" {
   privileges = [
     "VM.Allocate", "VM.Audit", "VM.Console", "VM.PowerMgmt", "VM.GuestAgent.Audit", "VM.Config.CDROM", "VM.Config.CPU", "VM.Config.Cloudinit", "VM.Config.Disk", "VM.Config.HWType", "VM.Config.Memory", "VM.Config.Network", "VM.Config.Options", "Datastore.AllocateSpace", "Datastore.Audit", "SDN.Use",
   ]
+}
+
+# ============================ #
+# ======== SSO (OIDC) ======== #
+# ============================ #
+ephemeral "vault_kv_secret_v2" "pve_oidc" {
+  mount = "secret"
+  name  = "services/pve"
+}
+
+resource "proxmox_realm_openid" "authelia" {
+  realm                 = "authelia"
+  issuer_url            = "https://sso.macopla.com"
+  client_id             = "pve"
+  client_key_wo         = ephemeral.vault_kv_secret_v2.pve_oidc.data["oidc_client_secret"]
+  client_key_wo_version = 1
+  scopes                = "openid email profile groups"
+  username_claim        = "username"
+  autocreate            = true
+  groups_claim          = "groups"
+  groups_autocreate     = false
+  groups_overwrite      = true
+  query_userinfo        = true
+  default               = true
+  comment               = "Authelia OIDC Connect - gere par OpenTofu"
+}
+
+resource "proxmox_virtual_environment_group" "admins_authelia" {
+  group_id = "admins-${proxmox_realm_openid.authelia.realm}"
+  comment  = "Groupe LLDAP admins, rempli par le realm authelia - gere par OpenTofu"
+}
+
+resource "proxmox_acl" "admins_authelia" {
+  group_id  = proxmox_virtual_environment_group.admins_authelia.group_id
+  path      = "/"
+  propagate = true
+  role_id   = "Administrator"
 }
