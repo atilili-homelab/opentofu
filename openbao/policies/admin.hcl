@@ -19,3 +19,6 @@ path "sys/mounts/*" { capabilities = ["create", "read", "update", "delete", "lis
 # Contenu des moteurs
 path "secret/*" { capabilities = ["create", "read", "update", "patch", "delete", "list"] }
 path "identity/*" { capabilities = ["create", "read", "update", "delete", "list"] }
+
+# Snapshots Raft
+path "sys/storage/raft/snapshot" { capabilities = ["read", "sudo"] }
