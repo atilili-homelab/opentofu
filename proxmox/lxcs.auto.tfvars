@@ -43,7 +43,7 @@ lxcs = {
     disk_size   = 4
     order       = 1
     up_delay    = 10
-    tags        = ["dns_server"]
+    tags        = ["dns_server", "dns_primary"]
   }
   "trainman" = {
     target_node = "supernode"
