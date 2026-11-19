@@ -183,7 +183,6 @@ vms = {
     up_delay   = 10
     down_delay = 10
     backup     = true
-    protection = false
     ha         = "started"
     replicate  = true
     tags       = ["mail", "tier_standalone"]
