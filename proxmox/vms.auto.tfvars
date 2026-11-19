@@ -178,7 +178,6 @@ vms = {
     memory      = 4096
     disks = {
       root = { size = 32, storage = "local-ZFS" }
-      data = { size = 100, storage = "local-ZFS", interface = "scsi1", backup = true }
     }
     order      = 3
     up_delay   = 10
