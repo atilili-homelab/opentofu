@@ -75,7 +75,7 @@ resource "proxmox_storage_directory" "local" {
 # TODO: switch to vault_kv_secret_v2 when [#2960](https://github.com/bpg/terraform-provider-proxmox/pull/2960) is resolved
 
 data "vault_generic_secret" "pbs" {
-  path = "secret/opentofu/backup-agent"
+  path = "secret/backup/pve-pbs"
 }
 
 resource "proxmox_storage_pbs" "nas_backup" {

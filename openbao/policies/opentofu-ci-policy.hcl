@@ -2,7 +2,7 @@ path "secret/data/opentofu/state" { capabilities = ["read"] }
 path "secret/data/opentofu/ci" { capabilities = ["read"] }
 path "secret/data/opentofu/proxmox" { capabilities = ["read"] }
 path "secret/data/opentofu/technitium" { capabilities = ["read"] }
-path "secret/data/opentofu/backup-agent" { capabilities = ["read"] }
+path "secret/data/backup/pve-pbs" { capabilities = ["read"] }
 
 path "secret/data/services/pve" { capabilities = ["read"] }
 path "secret/data/services/lldap" { capabilities = ["read"] }
