@@ -177,12 +177,13 @@ vms = {
     host_id     = 53
     memory      = 4096
     disks = {
-      root = { size = 32, storage = "local-ZFS" }
+      root = { size = 32, storage = "local-ZFS", backup = true }
     }
     order      = 3
     up_delay   = 10
     down_delay = 10
     backup     = true
+    protection = false
     ha         = "started"
     replicate  = true
     tags       = ["mail", "tier_standalone"]
